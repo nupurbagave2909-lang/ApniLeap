@@ -39,7 +39,7 @@ async function getProject(req, res, next) {
         if (!rows[0]) return res.status(404).json({ error: 'Project not found.' });
 
         const { rows: jiraRows } = await pool.query(
-            `SELECT jira_issue_key, jira_issue_id, created_at FROM jira_links WHERE project_id = $1 ORDER BY created_at DESC LIMIT 1`,
+            `SELECT jira_issue_key, jira_issue_id, link_type, created_at FROM jira_links WHERE project_id = $1 ORDER BY created_at DESC LIMIT 1`,
             [req.params.projectId]
         );
         const { rows: confluenceRows } = await pool.query(
@@ -47,11 +47,19 @@ async function getProject(req, res, next) {
             [req.params.projectId]
         );
 
+        let jiraUrl = null;
+        if (jiraRows[0]) {
+            const baseUrl = (process.env.JIRA_BASE_URL || '').replace(/\/$/, '');
+            if (jiraRows[0].link_type === 'JIRA_PROJECT') {
+                jiraUrl = `${baseUrl}/jira/software/projects/${jiraRows[0].jira_issue_key}/boards`;
+            } else {
+                jiraUrl = `${baseUrl}/browse/${jiraRows[0].jira_issue_key}`;
+            }
+        }
+
         res.json({
             project: rows[0],
-            jiraLink: jiraRows[0]
-                ? { key: jiraRows[0].jira_issue_key, url: `${(process.env.JIRA_BASE_URL || '').replace(/\/$/, '')}/browse/${jiraRows[0].jira_issue_key}` }
-                : null,
+            jiraLink: jiraRows[0] ? { key: jiraRows[0].jira_issue_key, url: jiraUrl, link_type: jiraRows[0].link_type } : null,
             confluenceLink: confluenceRows[0] ? { pageId: confluenceRows[0].confluence_page_id, url: confluenceRows[0].page_url } : null,
         });
     } catch (err) {

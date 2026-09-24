@@ -249,6 +249,9 @@ async function init() {
     });
   }
 
+  window.ApniLeap = window.ApniLeap || {};
+  window.ApniLeap.onRefresh = loadProjects;
+
   await loadProjects();
 }
 

@@ -433,3 +433,15 @@ code { color: var(--al-text); background: #eef1f5; padding: 1px 4px; border-radi
 .al-subtabs .nav-link { color: var(--al-text); background: #eef1f5; border-radius: 999px; padding: 5px 14px; font-size: 13.5px; font-weight: 500; }
 .al-subtabs .nav-link:hover { background: #e2e7ee; }
 .al-subtabs .nav-link.active { background: var(--al-primary); color: #ffffff; }
+
+/* In-site Refresh Button Animation */
+@keyframes al-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+.spinning {
+  display: inline-block !important;
+  animation: al-spin 0.75s linear infinite !important;
+  transform-origin: center center;
+}
+

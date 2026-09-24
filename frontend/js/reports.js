@@ -132,13 +132,20 @@ async function init() {
   }
   showTab(location.hash.slice(1) || 'weekly');
 
-  try {
-    const data = await Api.get('/reports/weekly');
-    render(data);
-  } catch (err) {
-    weeklyMeta = `<span class="text-danger">Failed to load report: ${esc(err.message)}</span>`;
-    if (document.querySelector('#reportTabs .nav-link.active').dataset.tab === 'weekly') document.getElementById('reportMeta').innerHTML = weeklyMeta;
+  async function reloadReports() {
+    try {
+      const data = await Api.get('/reports/weekly');
+      render(data);
+    } catch (err) {
+      weeklyMeta = `<span class="text-danger">Failed to load report: ${esc(err.message)}</span>`;
+      if (document.querySelector('#reportTabs .nav-link.active').dataset.tab === 'weekly') document.getElementById('reportMeta').innerHTML = weeklyMeta;
+    }
   }
+
+  window.ApniLeap = window.ApniLeap || {};
+  window.ApniLeap.onRefresh = reloadReports;
+
+  await reloadReports();
 }
 
 document.addEventListener('DOMContentLoaded', init);

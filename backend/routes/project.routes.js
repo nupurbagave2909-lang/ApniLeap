@@ -4,8 +4,8 @@ const {
     createJiraLink, createConfluenceLink, syncProject,
 } = require('../controllers/project.controller');
 const { listMilestones, createMilestone } = require('../controllers/milestone.controller');
-const { listKpis, createKpi } = require('../controllers/kpi.controller');
-const { listIssues, createIssue } = require('../controllers/issue.controller');
+const { listKpis, createKpi, addMeasurement, listMeasurements } = require('../controllers/kpi.controller');
+const { listIssues, createIssue, updateIssue } = require('../controllers/issue.controller');
 const { listActions, createAction } = require('../controllers/action.controller');
 const { listReviews, createReview } = require('../controllers/review.controller');
 const { listStudents, replaceStudents } = require('../controllers/student.controller');

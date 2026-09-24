@@ -88,3 +88,34 @@ const Api = (() => {
     setToken,
   };
 })();
+
+// Global in-site refresh coordination
+window.ApniLeap = window.ApniLeap || {};
+window.ApniLeap.onRefresh = null;
+window.ApniLeap.triggerRefresh = async function() {
+  const icons = document.querySelectorAll('.refresh-spinner-icon, #refreshIcon');
+  icons.forEach((el) => el.classList.add('spinning'));
+  try {
+    if (typeof window.ApniLeap.onRefresh === 'function') {
+      await window.ApniLeap.onRefresh();
+    } else {
+      window.location.reload();
+    }
+  } catch (err) {
+    console.error('Refresh error:', err);
+  } finally {
+    setTimeout(() => {
+      icons.forEach((el) => el.classList.remove('spinning'));
+    }, 350);
+  }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('#globalRefreshBtn, .btn-refresh-trigger').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.ApniLeap.triggerRefresh();
+    });
+  });
+});
+

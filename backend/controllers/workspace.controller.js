@@ -1,15 +1,109 @@
 const { pool } = require('../config/db');
+const jiraService = require('../services/jira.service');
+
+// Maps Jira status category / status name to ApniLeap workspace task status
+function mapJiraStatusToApniLeap(statusObj) {
+    const cat = (statusObj?.statusCategory?.name || statusObj?.statusCategory?.key || '').toLowerCase();
+    const name = (statusObj?.name || '').toLowerCase();
+    if (cat === 'done' || /done|completed|resolved|closed/.test(name)) {
+        return 'COMPLETED';
+    }
+    if (/to-do|to do|todo|backlog|selected for development/.test(name)) {
+        return 'TODO';
+    }
+    if (cat === 'in progress' || cat === 'indeterminate' || /in progress|in-progress|doing/.test(name)) {
+        return 'IN_PROGRESS';
+    }
+    return 'TODO';
+}
+
+function mapJiraPriorityToApniLeap(priorityObj) {
+    const name = (priorityObj?.name || '').toUpperCase();
+    if (name.includes('HIGH') || name.includes('CRITICAL') || name.includes('BLOCKER')) return 'HIGH';
+    if (name.includes('LOW') || name.includes('MINOR') || name.includes('TRIVIAL')) return 'LOW';
+    return 'MEDIUM';
+}
 
 // GET /api/projects/:projectId/workspace-tasks
+// Performs live bidirectional sync with Jira if a Jira Board is linked
 async function listWorkspaceTasks(req, res, next) {
     try {
         const projectId = req.params.projectId;
 
         // Fetch jira link if any
-        const { rows: jiraRows } = await pool.query(
+        let { rows: jiraRows } = await pool.query(
             `SELECT * FROM jira_links WHERE project_id = $1 ORDER BY created_at DESC LIMIT 1`,
             [projectId]
         );
+
+        // Auto-detect project key for AL-KLE-023 and AL-KLE-026 if not in jira_links
+        let projectKey = jiraRows[0]?.jira_issue_key;
+        const projectCode = req.project?.project_code || '';
+        if (!projectKey && projectCode) {
+            const stripped = projectCode.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            if (['ALKLE023', 'ALKLE026'].includes(stripped)) {
+                projectKey = stripped;
+                // Auto-create jira_link
+                await pool.query(
+                    `INSERT INTO jira_links (project_id, jira_issue_key, jira_issue_id, link_type)
+                     VALUES ($1, $2, $3, 'JIRA_PROJECT')
+                     ON CONFLICT DO NOTHING`,
+                    [projectId, projectKey, projectKey]
+                );
+            }
+        }
+
+        // Live Sync: Pull updates from Jira board into ApniLeap
+        if (projectKey && jiraService.isConfigured()) {
+            try {
+                const jiraIssues = await jiraService.fetchJiraProjectIssues(projectKey);
+                for (const ji of jiraIssues) {
+                    const mappedStatus = mapJiraStatusToApniLeap(ji.fields?.status);
+                    const mappedPriority = mapJiraPriorityToApniLeap(ji.fields?.priority);
+                    const summary = ji.fields?.summary || 'Untitled Task';
+                    const desc = jiraService.fromAdf(ji.fields?.description) || '';
+                    const assignee = ji.fields?.assignee?.displayName || null;
+
+                    // 1. Sync to workspace_tasks
+                    const { rows: matchedTasks } = await pool.query(
+                        `SELECT id, status, title FROM workspace_tasks WHERE jira_issue_key = $1 OR (project_id = $2 AND title = $3)`,
+                        [ji.key, projectId, summary]
+                    );
+
+                    if (matchedTasks.length > 0) {
+                        await pool.query(
+                            `UPDATE workspace_tasks
+                             SET status = $1, title = $2, description = COALESCE(NULLIF($3, ''), description),
+                                 priority = $4, assignee_name = COALESCE($5, assignee_name), jira_issue_key = $6, updated_at = now()
+                             WHERE id = $7`,
+                            [mappedStatus, summary, desc, mappedPriority, assignee, ji.key, matchedTasks[0].id]
+                        );
+                    } else {
+                        await pool.query(
+                            `INSERT INTO workspace_tasks (project_id, title, description, status, priority, assignee_name, jira_issue_key)
+                             VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                            [projectId, summary, desc, mappedStatus, mappedPriority, assignee, ji.key]
+                        );
+                    }
+
+                    // 2. If this issue is a synced Challenge, sync its status in the issues table too
+                    if (summary.startsWith('[Challenge]')) {
+                        const challengeStatus = mappedStatus === 'COMPLETED' ? 'RESOLVED' : mappedStatus === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'OPEN';
+                        await pool.query(
+                            `UPDATE issues SET status = $1, updated_at = now() WHERE jira_issue_key = $2 AND status != $1`,
+                            [challengeStatus, ji.key]
+                        );
+                    }
+
+                    // 3. If this issue is a synced KPI, sync status
+                    if (summary.startsWith('[KPI]')) {
+                        // Reflect active KPI tracking status
+                    }
+                }
+            } catch (syncErr) {
+                console.error(`Live Jira sync error for ${projectKey} (non-fatal):`, syncErr.message);
+            }
+        }
 
         let { rows: tasks } = await pool.query(
             `SELECT * FROM workspace_tasks WHERE project_id = $1 ORDER BY created_at ASC`,
@@ -64,9 +158,19 @@ async function listWorkspaceTasks(req, res, next) {
             }
         }
 
+        // Build proper Jira board URL
+        let boardUrl = null;
+        if (projectKey && jiraService.isConfigured()) {
+            boardUrl = `${jiraService.baseUrl()}/jira/software/projects/${projectKey}/boards`;
+        }
+
         res.json({
             tasks,
-            jiraLink: jiraRows[0] || null,
+            jiraLink: projectKey ? {
+                key: projectKey,
+                url: boardUrl,
+                link_type: 'JIRA_PROJECT',
+            } : (jiraRows[0] || null),
             project: {
                 id: req.project.id,
                 projectCode: req.project.project_code,
@@ -94,7 +198,8 @@ function canManageWorkspaceTask(user, project) {
         (user.projectIds || []).includes(project.id)
     );
     const isStudent = roles.includes('STUDENT') && (user.projectIds || []).includes(project.id);
-    return isGuide || isStudent;
+    const isAdmin = roles.includes('PLATFORM_ADMIN') || roles.includes('DEPARTMENT_HEAD');
+    return isGuide || isStudent || isAdmin;
 }
 
 // POST /api/projects/:projectId/workspace-tasks
@@ -118,7 +223,32 @@ async function createWorkspaceTask(req, res, next) {
         const taskPriority = validPriority.includes(priority) ? priority : 'MEDIUM';
 
         const pCode = req.project?.project_code || 'PROJ';
-        const key = jiraIssueKey ? jiraIssueKey.trim() : `${pCode}-${Math.floor(100 + Math.random() * 900)}`;
+        let key = jiraIssueKey ? jiraIssueKey.trim() : null;
+
+        // Try to create in Jira if Jira is linked
+        if (!key && jiraService.isConfigured()) {
+            const { rows: links } = await pool.query(
+                `SELECT jira_issue_key FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_PROJECT' LIMIT 1`,
+                [projectId]
+            );
+            const targetKey = links[0]?.jira_issue_key || pCode.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            if (targetKey) {
+                try {
+                    const issue = await jiraService.createWorkspaceTaskIssue(targetKey, title.trim(), description);
+                    key = issue.key;
+                    // Also transition to initial status if not TODO
+                    if (taskStatus !== 'TODO') {
+                        await jiraService.updateJiraIssueStatus(key, taskStatus);
+                    }
+                } catch (e) {
+                    console.error('Failed to create Jira workspace issue:', e.message);
+                }
+            }
+        }
+
+        if (!key) {
+            key = `${pCode}-${Math.floor(100 + Math.random() * 900)}`;
+        }
 
         const { rows } = await pool.query(
             `INSERT INTO workspace_tasks (project_id, title, description, status, priority, assignee_name, jira_issue_key, created_by)
@@ -159,6 +289,25 @@ async function updateWorkspaceTask(req, res, next) {
         const taskTitle = title !== undefined && title.trim() ? title.trim() : existing[0].title;
         const taskDesc = description !== undefined ? description : existing[0].description;
         const taskAssignee = assigneeName !== undefined ? assigneeName : existing[0].assignee_name;
+
+        // Two-way sync: Push status change to Jira
+        const currentJiraKey = existing[0].jira_issue_key;
+        if (currentJiraKey && jiraService.isConfigured()) {
+            if (taskStatus !== existing[0].status) {
+                try {
+                    await jiraService.updateJiraIssueStatus(currentJiraKey, taskStatus);
+                } catch (e) {
+                    console.error('Failed to sync status to Jira:', e.message);
+                }
+            }
+            if ((title && title !== existing[0].title) || (description && description !== existing[0].description)) {
+                try {
+                    await jiraService.updateJiraIssue(currentJiraKey, { summary: taskTitle, description: taskDesc });
+                } catch (e) {
+                    console.error('Failed to sync title/desc to Jira:', e.message);
+                }
+            }
+        }
 
         const { rows } = await pool.query(
             `UPDATE workspace_tasks

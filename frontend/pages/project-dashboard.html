@@ -23,6 +23,9 @@
       <a class="nav-link d-none" id="navAdmin" href="administration.html">Administration</a>
     </div>
     <div class="d-flex align-items-center gap-2 ms-xl-auto mt-2 mt-xl-0">
+      <button class="btn btn-sm btn-outline-light d-flex align-items-center gap-1 btn-refresh-trigger" id="globalRefreshBtn" title="Refresh data in-place">
+        <span class="refresh-spinner-icon">🔄</span> Refresh
+      </button>
       <span class="al-user-chip" id="userChip">&nbsp;</span>
       <button class="btn btn-sm btn-outline-light" id="logoutBtn">Logout</button>
     </div>
@@ -58,6 +61,10 @@
     <div class="d-flex flex-wrap gap-2">
       <button class="btn btn-al-primary btn-sm" id="btnUpdateStatus">Update Status</button>
       <button class="btn btn-outline-secondary btn-sm" id="btnNavChallenges">Challenges</button>
+      <button class="btn btn-outline-secondary btn-sm" id="btnNavKpis">KPIs</button>
+      <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1 btn-refresh-trigger" id="btnRefreshDashboard" title="Refresh all project details, challenges, and KPIs">
+        <span class="refresh-spinner-icon">🔄</span> Refresh
+      </button>
     </div>
   </div>
 
@@ -412,10 +419,11 @@
       <div class="modal-header"><h5 class="modal-title">Add Challenge</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
       <div class="modal-body">
         <form id="issueForm">
-          <div class="mb-2"><label class="form-label">Challenge Title</label><input class="form-control" id="issueTitle" placeholder="Describe the challenge or issue" required></div>
-          <div class="mb-2"><label class="form-label">Root Cause</label><textarea class="form-control" id="issueRootCause" rows="2"></textarea></div>
-          <div class="mb-2"><label class="form-label">Impact</label><textarea class="form-control" id="issueImpact" rows="2"></textarea></div>
-          <div class="mb-2"><label class="form-label">Support Required</label><textarea class="form-control" id="issueSupportRequired" rows="2"></textarea></div>
+          <input type="hidden" id="issueEditId" value="">
+          <div class="mb-2"><label class="form-label">Challenge Title <span class="text-danger">*</span></label><input class="form-control" id="issueTitle" placeholder="Describe the challenge or issue" required></div>
+          <div class="mb-2"><label class="form-label">Root Cause</label><textarea class="form-control" id="issueRootCause" rows="2" placeholder="What caused this challenge?"></textarea></div>
+          <div class="mb-2"><label class="form-label">Impact</label><textarea class="form-control" id="issueImpact" rows="2" placeholder="How does it affect the project?"></textarea></div>
+          <div class="mb-2"><label class="form-label">Support Required</label><textarea class="form-control" id="issueSupportRequired" rows="2" placeholder="Technical / Faculty / Industry / Other"></textarea></div>
           <div class="al-login-error" id="issueError"></div>
         </form>
       </div>

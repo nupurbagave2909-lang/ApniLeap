@@ -384,27 +384,43 @@ async function init() {
 
   const roleInfo = { isFacultyOnly, isDean, isHead, isAdmin, isReadOnly, isReviewer, isDeptDrilldown, hideStatus };
 
+  async function loadDashboardContent() {
+    if (roleInfo.isDeptDrilldown) {
+      await loadDeanDepartments(currentUser, roleInfo.hideStatus);
+    } else if (roleInfo.isHead) {
+      await loadHodThemes(currentUser);
+    } else if (roleInfo.isAdmin) {
+      await loadInstituteGrid();
+    } else {
+      await loadProjectsDashboard(currentUser, roleInfo);
+    }
+  }
+
+  window.ApniLeap = window.ApniLeap || {};
+  window.ApniLeap.onRefresh = loadDashboardContent;
+
+  const btnRefreshPage = document.getElementById('btnRefreshPage');
+  if (btnRefreshPage) {
+    btnRefreshPage.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.ApniLeap.triggerRefresh();
+    });
+  }
+
   // Dean, Read-only Stakeholders, and Reviewers see Department Choice Boxes directly (Depts -> Themes -> Projects)
   if (roleInfo.isDeptDrilldown) {
     const deanView = document.getElementById('deanView');
     const projectsView = document.getElementById('projectsView');
-
     deanView.classList.remove('d-none');
     projectsView.classList.add('d-none');
-
-    await loadDeanDepartments(currentUser, roleInfo.hideStatus);
   } else if (roleInfo.isHead) {
     const hodView = document.getElementById('hodView');
     const projectsView = document.getElementById('projectsView');
-
     hodView.classList.remove('d-none');
     projectsView.classList.add('d-none'); // Department themes come first!
-
-    await loadHodThemes(currentUser);
   } else if (roleInfo.isAdmin) {
     const instituteCard = document.getElementById('instituteSummaryCard');
     const projectsView = document.getElementById('projectsView');
-
     instituteCard.classList.remove('d-none');
     projectsView.classList.add('d-none');
 
@@ -412,11 +428,9 @@ async function init() {
     const pageSubtitle = document.getElementById('pageSubtitle');
     pageTitle.textContent = 'Mini-Project Portfolio';
     pageSubtitle.textContent = 'All projects under your administrative oversight';
-
-    await loadInstituteGrid();
-  } else {
-    await loadProjectsDashboard(currentUser, roleInfo);
   }
+
+  await loadDashboardContent();
 }
 
 document.addEventListener('DOMContentLoaded', init);

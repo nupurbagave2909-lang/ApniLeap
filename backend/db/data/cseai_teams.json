@@ -1,0 +1,1582 @@
+[
+  {
+    "teamNo": "A1",
+    "div": "A",
+    "guideRaw": "Ms.Jyothi Patil",
+    "guideClean": "Jyothi Patil",
+    "title": "Mini RDBMS Engine with Query Processing & Transaction Support",
+    "theme": "Databases, Data Engineering & Storage",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Bhoomi B",
+        "rollNo": "101",
+        "srn": "01FE24BCI044",
+        "email": "01fe24bci044@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 9.21
+      },
+      {
+        "slot": 2,
+        "name": "Sneha S",
+        "rollNo": "102",
+        "srn": "01FE24BCI061",
+        "email": "01fe24bci061@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.76
+      },
+      {
+        "slot": 3,
+        "name": "Soumya P",
+        "rollNo": "103",
+        "srn": "01FE24BCI005",
+        "email": "01fe24bci005@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7
+      },
+      {
+        "slot": 4,
+        "name": "Shubham M",
+        "rollNo": "104",
+        "srn": "01FE24BCI083",
+        "email": "01fe24bci083@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.2
+      }
+    ]
+  },
+  {
+    "teamNo": "A2",
+    "div": "A",
+    "guideRaw": "Ms.N D Kulenavar",
+    "guideClean": "N D Kulenavar",
+    "title": "C Language Compiler & Code Generation Engine",
+    "theme": "Compilers & Code Generation",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Vaishnavi K",
+        "rollNo": "105",
+        "srn": "01FE24BCI051",
+        "email": "01fe24bci051@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 9.53
+      },
+      {
+        "slot": 2,
+        "name": "Shreenidhi D",
+        "rollNo": "106",
+        "srn": "01FE24BCI042",
+        "email": "01fe24bci042@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.9
+      },
+      {
+        "slot": 3,
+        "name": "Suhas K",
+        "rollNo": "107",
+        "srn": "01FE24BCI019",
+        "email": "01fe24bci019@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.6
+      },
+      {
+        "slot": 4,
+        "name": "Sanket  Y U",
+        "rollNo": "108",
+        "srn": "01FE24BCI037",
+        "email": "01fe24bci037@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.3
+      }
+    ]
+  },
+  {
+    "teamNo": "A3",
+    "div": "A",
+    "guideRaw": "Mr.Amit Kachavimath",
+    "guideClean": "Amit Kachavimath",
+    "title": "Smart Campus Lab & Resource Optimizer",
+    "theme": "Scheduling & Resource Allocation",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Vedant Khot",
+        "rollNo": "109",
+        "srn": "01FE24BCI028",
+        "email": "01fe24bci028@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.92
+      },
+      {
+        "slot": 2,
+        "name": "Nupur Bagave",
+        "rollNo": "110",
+        "srn": "01FE24BCI029",
+        "email": "01fe24bci029@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 9.08
+      },
+      {
+        "slot": 3,
+        "name": "Parth Karpe",
+        "rollNo": "111",
+        "srn": "01FE24BCI062",
+        "email": "01fe24bci062@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 9.48
+      },
+      {
+        "slot": 4,
+        "name": "Sachi Aratti",
+        "rollNo": "112",
+        "srn": "01FE24BCI003",
+        "email": "01fe24bci003@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.19
+      }
+    ]
+  },
+  {
+    "teamNo": "A4",
+    "div": "A",
+    "guideRaw": "Mr.Maheshgouda Patil",
+    "guideClean": "Maheshgouda Patil",
+    "title": "Resource Packing & Allocation Optimization Engine",
+    "theme": "Scheduling & Resource Allocation",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Sumanth Patil",
+        "rollNo": "113",
+        "srn": "01FE24BCI085",
+        "email": "01fe24bci085@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 6.9
+      },
+      {
+        "slot": 2,
+        "name": "Neil Mascarenhas",
+        "rollNo": "114",
+        "srn": "01FE24BCI070",
+        "email": "01fe24bci070@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.79
+      },
+      {
+        "slot": 3,
+        "name": "Dasari Joshua",
+        "rollNo": "115",
+        "srn": "01FE24BCI078",
+        "email": "01fe24bci078@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 6.86
+      },
+      {
+        "slot": 4,
+        "name": "Akash Dani",
+        "rollNo": "116",
+        "srn": "01FE24BCI081",
+        "email": "01fe24bci081@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.3
+      }
+    ]
+  },
+  {
+    "teamNo": "A5",
+    "div": "A",
+    "guideRaw": "Ms.Sadaf Anjum Savanu",
+    "guideClean": "Sadaf Anjum Savanu",
+    "title": "Distributed Peer Search & File Sharing Engine",
+    "theme": "Distributed Systems, File Sharing & Search",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Mudit J Nayak",
+        "rollNo": "117",
+        "srn": "01FE24BCI076",
+        "email": "01fe24bci076@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.3
+      },
+      {
+        "slot": 2,
+        "name": "Manoj Kamat",
+        "rollNo": "118",
+        "srn": "01FE24BCI077",
+        "email": "01fe24bci077@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.01
+      },
+      {
+        "slot": 3,
+        "name": "Kartik NHM",
+        "rollNo": "119",
+        "srn": "01FE24BCI072",
+        "email": "01fe24bci072@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.53
+      },
+      {
+        "slot": 4,
+        "name": "Aditya Patil",
+        "rollNo": "120",
+        "srn": "01FE24BCI059",
+        "email": "01fe24bci059@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 6.98
+      }
+    ]
+  },
+  {
+    "teamNo": "A6",
+    "div": "A",
+    "guideRaw": "Mr.Mallikarjun Akki",
+    "guideClean": "Mallikarjun Akki",
+    "title": "Constraint-Based Academic Timetable Scheduling Engine",
+    "theme": "Scheduling & Resource Allocation",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Srujana patil",
+        "rollNo": "121",
+        "srn": "01FE24BCI020",
+        "email": "01fe24bci020@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.7
+      },
+      {
+        "slot": 2,
+        "name": "Yash Raj",
+        "rollNo": "122",
+        "srn": "01FE24BCI064",
+        "email": "01fe24bci064@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 9.03
+      },
+      {
+        "slot": 3,
+        "name": "Yashwanth Reddy",
+        "rollNo": "123",
+        "srn": "01FE24BCI010",
+        "email": "01fe24bci010@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 9.11
+      },
+      {
+        "slot": 4,
+        "name": "Abhinav Raj",
+        "rollNo": "124",
+        "srn": "01FE24BCI058",
+        "email": "01fe24bci058@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.65
+      }
+    ]
+  },
+  {
+    "teamNo": "A7",
+    "div": "A",
+    "guideRaw": "Ms.Pooja P Shettar",
+    "guideClean": "Pooja P Shettar",
+    "title": "Network Traffic Monitoring & Protocol Analysis Tool",
+    "theme": "Networking, Protocols & Streaming",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Chhavi Mishra",
+        "rollNo": "125",
+        "srn": "01FE24BCI066",
+        "email": "01fe24bci066@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.81
+      },
+      {
+        "slot": 2,
+        "name": "Hrishikesh Patil",
+        "rollNo": "126",
+        "srn": "01FE24BCI043",
+        "email": "01fe24bci043@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 9.12
+      },
+      {
+        "slot": 3,
+        "name": "Vaibhav P",
+        "rollNo": "127",
+        "srn": "01FE24BCI074",
+        "email": "01fe24bci074@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.2
+      },
+      {
+        "slot": 4,
+        "name": "M Janaki",
+        "rollNo": "128",
+        "srn": "01FE24BCI067",
+        "email": "01fe24bci067@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 9.1
+      }
+    ]
+  },
+  {
+    "teamNo": "A8",
+    "div": "A",
+    "guideRaw": "Ms.Sneha Varur",
+    "guideClean": "Sneha Varur",
+    "title": "Large-Scale Dataset Profiling & Data Quality Engine",
+    "theme": "Databases, Data Engineering & Storage",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Anupriya S",
+        "rollNo": "129",
+        "srn": "01FE24BCI046",
+        "email": "01fe24bci046@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 9.02
+      },
+      {
+        "slot": 2,
+        "name": "Pavitra J",
+        "rollNo": "130",
+        "srn": "01FE24BCI049",
+        "email": "01fe24bci049@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.4
+      },
+      {
+        "slot": 3,
+        "name": "Anushree A",
+        "rollNo": "131",
+        "srn": "01FE24BCI050",
+        "email": "01fe24bci050@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.91
+      },
+      {
+        "slot": 4,
+        "name": "Sahana A",
+        "rollNo": "132",
+        "srn": "01FE24BCI030",
+        "email": "01fe24bci030@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.43
+      }
+    ]
+  },
+  {
+    "teamNo": "A9",
+    "div": "A",
+    "guideRaw": "Ms.Sneha Varur",
+    "guideClean": "Sneha Varur",
+    "title": "Multi-Source Data Integration & Entity Resolution Engine",
+    "theme": "Databases, Data Engineering & Storage",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Varsha K",
+        "rollNo": "133",
+        "srn": "01FE24BCI082",
+        "email": "01fe24bci082@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.69
+      },
+      {
+        "slot": 2,
+        "name": "Gayathri Davara",
+        "rollNo": "134",
+        "srn": "01FE24BCI068",
+        "email": "01fe24bci068@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.25
+      },
+      {
+        "slot": 3,
+        "name": "Krupa Akki",
+        "rollNo": "135",
+        "srn": "01FE24BCI057",
+        "email": "01fe24bci057@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8
+      },
+      {
+        "slot": 4,
+        "name": "Srushti Shetti",
+        "rollNo": "136",
+        "srn": "01FE24BCI002",
+        "email": "01fe24bci002@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.1
+      }
+    ]
+  },
+  {
+    "teamNo": "A10",
+    "div": "A",
+    "guideRaw": "Mr.Dheerajkumar",
+    "guideClean": "Dheerajkumar",
+    "title": "Dependency-Aware Parallel Build System",
+    "theme": "Operating Systems: Build & Process Management",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Prathamesh Eedigi",
+        "rollNo": "137",
+        "srn": "01FE24BCI006",
+        "email": "01fe24bci006@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 9.3
+      },
+      {
+        "slot": 2,
+        "name": "Sunayana Kamat",
+        "rollNo": "138",
+        "srn": "01FE24BCI073",
+        "email": "01fe24bci073@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.15
+      },
+      {
+        "slot": 3,
+        "name": "Jaideep",
+        "rollNo": "139",
+        "srn": "01FE24BCI084",
+        "email": "01fe24bci084@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.11
+      },
+      {
+        "slot": 4,
+        "name": "Nilaksha",
+        "rollNo": "140",
+        "srn": "01FE24BCI087",
+        "email": "01fe24bci087@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.57
+      }
+    ]
+  },
+  {
+    "teamNo": "A11",
+    "div": "A",
+    "guideRaw": "Ms.Pooja P Shettar",
+    "guideClean": "Pooja P Shettar",
+    "title": "Distributed Job Queue & Task Processing Engine",
+    "theme": "Distributed Systems, File Sharing & Search",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Adarsh W",
+        "rollNo": "141",
+        "srn": "01FE24BCI071",
+        "email": "01fe24bci071@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.96
+      },
+      {
+        "slot": 2,
+        "name": "Mansi D",
+        "rollNo": "142",
+        "srn": "01FE24BCI115",
+        "email": "01fe24bci115@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 6.64
+      },
+      {
+        "slot": 3,
+        "name": "Shravya A",
+        "rollNo": "143",
+        "srn": "01FE24BCI001",
+        "email": "01fe24bci001@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 6.32
+      },
+      {
+        "slot": 4,
+        "name": "Tanamayee K",
+        "rollNo": "144",
+        "srn": "01FE24BCI007",
+        "email": "01fe24bci007@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 5.94
+      }
+    ]
+  },
+  {
+    "teamNo": "A12",
+    "div": "A",
+    "guideRaw": "Ms.Sneha Varur",
+    "guideClean": "Sneha Varur",
+    "title": "Concurrent Booking & Resource Allocation Engine",
+    "theme": "Concurrent Booking & Service Dispatch Systems",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Akshata Patil",
+        "rollNo": "145",
+        "srn": "01FE24BCI088",
+        "email": "01fe24bci088@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.74
+      },
+      {
+        "slot": 2,
+        "name": "Srujana B",
+        "rollNo": "146",
+        "srn": "01FE24BCI041",
+        "email": "01fe24bci041@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.36
+      },
+      {
+        "slot": 3,
+        "name": "Mythri Gaded",
+        "rollNo": "147",
+        "srn": "01FE24BCI031",
+        "email": "01fe24bci031@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 6.5
+      },
+      {
+        "slot": 4,
+        "name": "Vandana A M",
+        "rollNo": "148",
+        "srn": "01FE24BCI075",
+        "email": "01fe24bci075@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 6.95
+      }
+    ]
+  },
+  {
+    "teamNo": "A13",
+    "div": "A",
+    "guideRaw": "Ms.Umadevi F M",
+    "guideClean": "Umadevi F M",
+    "title": "Distributed Event Processing & Notification Engine",
+    "theme": "Distributed Systems, File Sharing & Search",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Avinash B Z",
+        "rollNo": "149",
+        "srn": "01FE24BCI045",
+        "email": "01fe24bci045@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.55
+      },
+      {
+        "slot": 2,
+        "name": "Sagar B U",
+        "rollNo": "150",
+        "srn": "01FE24BCI054",
+        "email": "01fe24bci054@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.87
+      },
+      {
+        "slot": 3,
+        "name": "Ramesh S K",
+        "rollNo": "151",
+        "srn": "01FE24BCI039",
+        "email": "01fe24bci039@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 6.82
+      },
+      {
+        "slot": 4,
+        "name": "ABHINANDAN",
+        "rollNo": "152",
+        "srn": "01FE24BCI052",
+        "email": "01fe24bci052@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.7
+      }
+    ]
+  },
+  {
+    "teamNo": "A14",
+    "div": "A",
+    "guideRaw": "Ms.Arundati Aralimatti",
+    "guideClean": "Arundati Aralimatti",
+    "title": "Mini Kernel with Process, Memory & File Management",
+    "theme": "Operating Systems: Build & Process Management",
+    "students": [
+      {
+        "slot": 1,
+        "name": "BHAVANA",
+        "rollNo": "153",
+        "srn": "01FE24BCI036",
+        "email": "01fe24bci036@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 9.2
+      },
+      {
+        "slot": 2,
+        "name": "ZAKIYA",
+        "rollNo": "154",
+        "srn": "01FE24BCI038",
+        "email": "01fe24bci038@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 8.8
+      },
+      {
+        "slot": 3,
+        "name": "PRADEEP",
+        "rollNo": "155",
+        "srn": "01FE24BCI040",
+        "email": "01fe24bci040@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 9.24
+      },
+      {
+        "slot": 4,
+        "name": "VIKITA R",
+        "rollNo": "156",
+        "srn": "01FE24BCI055",
+        "email": "01fe24bci055@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.94
+      }
+    ]
+  },
+  {
+    "teamNo": "A15",
+    "div": "A",
+    "guideRaw": "Ms.Soumya Patil",
+    "guideClean": "Soumya Patil",
+    "title": "Concurrent Service Request & Dispatch Engine",
+    "theme": "Concurrent Booking & Service Dispatch Systems",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Monika M B",
+        "rollNo": "157",
+        "srn": "01FE24BCI035",
+        "email": "01fe24bci035@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 9.12
+      },
+      {
+        "slot": 2,
+        "name": "Akshatha M",
+        "rollNo": "158",
+        "srn": "01FE24BCI080",
+        "email": "01fe24bci080@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 6.97
+      },
+      {
+        "slot": 3,
+        "name": "Kalavva  MANVI",
+        "rollNo": "159",
+        "srn": "01FE24BCI056",
+        "email": "01fe24bci056@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.91
+      },
+      {
+        "slot": 4,
+        "name": "Abhishek N",
+        "rollNo": "160",
+        "srn": "01FE23BCI112",
+        "email": "01fe23bci112@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 5.7
+      }
+    ]
+  },
+  {
+    "teamNo": "A16",
+    "div": "A",
+    "guideRaw": "Ms.N D Kulenavar",
+    "guideClean": "N D Kulenavar",
+    "title": "Multi-User Resource Reservation & Scheduling Engine",
+    "theme": "Scheduling & Resource Allocation",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Vishal p k",
+        "rollNo": "161",
+        "srn": "01FE24BCI060",
+        "email": "01fe24bci060@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 6.3
+      },
+      {
+        "slot": 2,
+        "name": "Vinayak s k",
+        "rollNo": "162",
+        "srn": "01FE24BCI086",
+        "email": "01fe24bci086@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.12
+      },
+      {
+        "slot": 3,
+        "name": "Manoj b kamath",
+        "rollNo": "163",
+        "srn": "01FE24BCI163",
+        "email": "01fe24bci163@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.81
+      },
+      {
+        "slot": 4,
+        "name": "Sushilendra E",
+        "rollNo": "164",
+        "srn": "01FE24BCI053",
+        "email": "01fe24bci053@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.7
+      }
+    ]
+  },
+  {
+    "teamNo": "A17",
+    "div": "A",
+    "guideRaw": "Ms.Pooja P Shettar",
+    "guideClean": "Pooja P Shettar",
+    "title": "Distributed File Metadata & Access Management Engine",
+    "theme": "Distributed Systems, File Sharing & Search",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Rohan Baddur",
+        "rollNo": "165",
+        "srn": "01FE24BCI047",
+        "email": "01fe24bci047@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7
+      },
+      {
+        "slot": 2,
+        "name": "Adarsh Benawadi",
+        "rollNo": "166",
+        "srn": "01FE24BCI063",
+        "email": "01fe24bci063@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 6.65
+      },
+      {
+        "slot": 3,
+        "name": "Sandesh Tonni",
+        "rollNo": "167",
+        "srn": "01FE24BCI048",
+        "email": "01fe24bci048@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 7.48
+      }
+    ]
+  },
+  {
+    "teamNo": "A18",
+    "div": "A",
+    "guideRaw": "Ms.Umadevi F M",
+    "guideClean": "Umadevi F M",
+    "title": "Concurrent Helpdesk Ticketing & Service Dispatch System",
+    "theme": "Concurrent Booking & Service Dispatch Systems",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Shifa",
+        "rollNo": "168",
+        "srn": "01FE24BCI004",
+        "email": "01fe24bci004@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": 6.82
+      },
+      {
+        "slot": 2,
+        "name": "Bhakti",
+        "rollNo": "169",
+        "srn": "01FE24BCI169",
+        "email": "01fe24bci169@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": null
+      },
+      {
+        "slot": 3,
+        "name": "Chinmayee",
+        "rollNo": "170",
+        "srn": "01FE24BCI170",
+        "email": "01fe24bci170@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": null
+      },
+      {
+        "slot": 4,
+        "name": "Vinay",
+        "rollNo": "171",
+        "srn": "01FE24BCI171",
+        "email": "01fe24bci171@kletech.ac.in",
+        "semester": 5,
+        "division": "A",
+        "cgpa": null
+      }
+    ]
+  },
+  {
+    "teamNo": "B1",
+    "div": "B",
+    "guideRaw": "Mr.Dheerajkumar",
+    "guideClean": "Dheerajkumar",
+    "title": "Incremental Build & Dependency Resolution Tool",
+    "theme": "Operating Systems: Build & Process Management",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Sankalp Patil",
+        "rollNo": "201",
+        "srn": "01FE24BCI095",
+        "email": "01fe24bci095@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.91
+      },
+      {
+        "slot": 2,
+        "name": "Sai Jarkiholi",
+        "rollNo": "202",
+        "srn": "01FE24BCI014",
+        "email": "01fe24bci014@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.06
+      },
+      {
+        "slot": 3,
+        "name": "Pranav Naik",
+        "rollNo": "203",
+        "srn": "01FE24BCI100",
+        "email": "01fe24bci100@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.43
+      },
+      {
+        "slot": 4,
+        "name": "Abdul Khadar I",
+        "rollNo": "204",
+        "srn": "01FE24BCI102",
+        "email": "01fe24bci102@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.92
+      }
+    ]
+  },
+  {
+    "teamNo": "B2",
+    "div": "B",
+    "guideRaw": "Ms.Sneha Varur",
+    "guideClean": "Sneha Varur",
+    "title": "Concurrent Booking & Reservation Management System",
+    "theme": "Concurrent Booking & Service Dispatch Systems",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Abhinandan Patil",
+        "rollNo": "205",
+        "srn": "01FE24BCI034",
+        "email": "01fe24bci034@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 6.7
+      },
+      {
+        "slot": 2,
+        "name": "Preetam N G",
+        "rollNo": "206",
+        "srn": "01FE24BCI018",
+        "email": "01fe24bci018@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.5
+      },
+      {
+        "slot": 3,
+        "name": "Chanabasappa Metgud",
+        "rollNo": "207",
+        "srn": "01FE24BCI027",
+        "email": "01fe24bci027@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.16
+      },
+      {
+        "slot": 4,
+        "name": "Sai Aaryan Muktineni",
+        "rollNo": "208",
+        "srn": "01FE24BCI025",
+        "email": "01fe24bci025@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 6.4
+      }
+    ]
+  },
+  {
+    "teamNo": "B3",
+    "div": "B",
+    "guideRaw": "Mr.Mallikarjun Akki",
+    "guideClean": "Mallikarjun Akki",
+    "title": "Route Planning & Network Optimization Engine",
+    "theme": "Networking, Protocols & Streaming",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Ankush",
+        "rollNo": "209",
+        "srn": "01FE24BCI096",
+        "email": "01fe24bci096@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.97
+      },
+      {
+        "slot": 2,
+        "name": "Shrikar",
+        "rollNo": "210",
+        "srn": "01FE24BCI013",
+        "email": "01fe24bci013@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.4
+      },
+      {
+        "slot": 3,
+        "name": "P Sai sri ram",
+        "rollNo": "211",
+        "srn": "01FE24BCI033",
+        "email": "01fe24bci033@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7
+      },
+      {
+        "slot": 4,
+        "name": "Shreya u",
+        "rollNo": "212",
+        "srn": "01FE24BCI032",
+        "email": "01fe24bci032@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.5
+      }
+    ]
+  },
+  {
+    "teamNo": "B4",
+    "div": "B",
+    "guideRaw": "Ms.Umadevi F M",
+    "guideClean": "Umadevi F M",
+    "title": "Multi-Process Search Engine with Persistent Index",
+    "theme": "Distributed Systems, File Sharing & Search",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Aditya Gavimath",
+        "rollNo": "213",
+        "srn": "01FE24BCI120",
+        "email": "01fe24bci120@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.04
+      },
+      {
+        "slot": 2,
+        "name": "Arun Hadimani",
+        "rollNo": "214",
+        "srn": "01FE24BCI106",
+        "email": "01fe24bci106@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 9.05
+      },
+      {
+        "slot": 3,
+        "name": "Kartik Hegde",
+        "rollNo": "215",
+        "srn": "01FE24BCI107",
+        "email": "01fe24bci107@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.56
+      },
+      {
+        "slot": 4,
+        "name": "Prajwal B",
+        "rollNo": "216",
+        "srn": "01FE25BCI701",
+        "email": "01fe25bci701@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 6
+      }
+    ]
+  },
+  {
+    "teamNo": "B5",
+    "div": "B",
+    "guideRaw": "Ms.Shrushti Gani",
+    "guideClean": "Shrushti Gani",
+    "title": "Persistent Key-Value Storage Engine",
+    "theme": "Databases, Data Engineering & Storage",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Keerthana K",
+        "rollNo": "217",
+        "srn": "01FE24BCI118",
+        "email": "01fe24bci118@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 9.09
+      },
+      {
+        "slot": 2,
+        "name": "Sukanya",
+        "rollNo": "218",
+        "srn": "01FE24BCI108",
+        "email": "01fe24bci108@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 9.03
+      },
+      {
+        "slot": 3,
+        "name": "Pooja",
+        "rollNo": "219",
+        "srn": "01FE24BCI105",
+        "email": "01fe24bci105@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.93
+      },
+      {
+        "slot": 4,
+        "name": "Sakshi",
+        "rollNo": "220",
+        "srn": "01FE24BCI109",
+        "email": "01fe24bci109@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 9.09
+      }
+    ]
+  },
+  {
+    "teamNo": "B6",
+    "div": "B",
+    "guideRaw": "Mr.Pavankumar Saunshi",
+    "guideClean": "Pavankumar Saunshi",
+    "title": "Dynamic Task Assignment & Scheduling Engine",
+    "theme": "Scheduling & Resource Allocation",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Alsaba A",
+        "rollNo": "221",
+        "srn": "01FE25BCI705",
+        "email": "01fe25bci705@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.46
+      },
+      {
+        "slot": 2,
+        "name": "Rakshita K",
+        "rollNo": "222",
+        "srn": "01FE25BCI708",
+        "email": "01fe25bci708@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.57
+      },
+      {
+        "slot": 3,
+        "name": "Omkar M",
+        "rollNo": "223",
+        "srn": "01FE25BCI703",
+        "email": "01fe25bci703@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 6.04
+      },
+      {
+        "slot": 4,
+        "name": "Harsh H",
+        "rollNo": "224",
+        "srn": "01FE25BCI707",
+        "email": "01fe25bci707@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8
+      }
+    ]
+  },
+  {
+    "teamNo": "B7",
+    "div": "B",
+    "guideRaw": "Ms.N D Kulenavar",
+    "guideClean": "N D Kulenavar",
+    "title": "Java Compiler & Bytecode Generation Engine",
+    "theme": "Compilers & Code Generation",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Chaitanya",
+        "rollNo": "225",
+        "srn": "01FE24BCI098",
+        "email": "01fe24bci098@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 9.46
+      },
+      {
+        "slot": 2,
+        "name": "Soumya",
+        "rollNo": "226",
+        "srn": "01FE24BCI121",
+        "email": "01fe24bci121@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.89
+      },
+      {
+        "slot": 3,
+        "name": "Chaitra",
+        "rollNo": "227",
+        "srn": "01FE25BCI706",
+        "email": "01fe25bci706@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.92
+      },
+      {
+        "slot": 4,
+        "name": "Shridevi",
+        "rollNo": "228",
+        "srn": "01FE24BCI103",
+        "email": "01fe24bci103@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.78
+      }
+    ]
+  },
+  {
+    "teamNo": "B8",
+    "div": "B",
+    "guideRaw": "Ms.Soumya Patil",
+    "guideClean": "Soumya Patil",
+    "title": "Concurrent Service Request & Dispatch Engine",
+    "theme": "Concurrent Booking & Service Dispatch Systems",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Chirag Salecha",
+        "rollNo": "229",
+        "srn": "01FE24BCI089",
+        "email": "01fe24bci089@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.8
+      },
+      {
+        "slot": 2,
+        "name": "Achyuth RH",
+        "rollNo": "230",
+        "srn": "01FE24BCI091",
+        "email": "01fe24bci091@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 6.2
+      },
+      {
+        "slot": 3,
+        "name": "Abhijit RH",
+        "rollNo": "231",
+        "srn": "01FE25BCI709",
+        "email": "01fe25bci709@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.5
+      },
+      {
+        "slot": 4,
+        "name": "Sagar PM",
+        "rollNo": "232",
+        "srn": "01FE25BCI712",
+        "email": "01fe25bci712@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7
+      }
+    ]
+  },
+  {
+    "teamNo": "B9",
+    "div": "B",
+    "guideRaw": "Ms.N D Kulenavar",
+    "guideClean": "N D Kulenavar",
+    "title": "Multi-User Resource Reservation & Scheduling Engine",
+    "theme": "Scheduling & Resource Allocation",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Jayapal Mukre",
+        "rollNo": "233",
+        "srn": "01FE24BCI022",
+        "email": "01fe24bci022@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 6.31
+      },
+      {
+        "slot": 2,
+        "name": "Amogh Loni",
+        "rollNo": "234",
+        "srn": "01FE24BCI017",
+        "email": "01fe24bci017@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.3
+      },
+      {
+        "slot": 3,
+        "name": "Sammed Patil",
+        "rollNo": "235",
+        "srn": "01FE24BCI235",
+        "email": "01fe24bci235@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7
+      },
+      {
+        "slot": 4,
+        "name": "Humera",
+        "rollNo": "236",
+        "srn": "01FE24BCI114",
+        "email": "01fe24bci114@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 6.5
+      }
+    ]
+  },
+  {
+    "teamNo": "B10",
+    "div": "B",
+    "guideRaw": "Ms.Umadevi F M",
+    "guideClean": "Umadevi F M",
+    "title": "Large-Scale Log Processing & Analytics Engine",
+    "theme": "Databases, Data Engineering & Storage",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Ananya Bhat",
+        "rollNo": "237",
+        "srn": "01FE24BCI117",
+        "email": "01fe24bci117@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 9.21
+      },
+      {
+        "slot": 2,
+        "name": "Priya Kshirsagar",
+        "rollNo": "238",
+        "srn": "01FE24BCI110",
+        "email": "01fe24bci110@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 9.17
+      },
+      {
+        "slot": 3,
+        "name": "Gurusiddeshwar N",
+        "rollNo": "239",
+        "srn": "01FE25BCI710",
+        "email": "01fe25bci710@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 6
+      },
+      {
+        "slot": 4,
+        "name": "Amit K",
+        "rollNo": "240",
+        "srn": "01FE24BCI090",
+        "email": "01fe24bci090@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 6.4
+      }
+    ]
+  },
+  {
+    "teamNo": "B11",
+    "div": "B",
+    "guideRaw": "Mr.Pavankumar Saunshi",
+    "guideClean": "Pavankumar Saunshi",
+    "title": "DNS Resolver & Caching Server",
+    "theme": "Networking, Protocols & Streaming",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Vageesh Mathad",
+        "rollNo": "241",
+        "srn": "01FE24BCI008",
+        "email": "01fe24bci008@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.1
+      },
+      {
+        "slot": 2,
+        "name": "Mehak sayed Yusuf",
+        "rollNo": "242",
+        "srn": "01FE24BCI012",
+        "email": "01fe24bci012@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.3
+      },
+      {
+        "slot": 3,
+        "name": "Joel Biju",
+        "rollNo": "243",
+        "srn": "01FE24BCI021",
+        "email": "01fe24bci021@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.3
+      }
+    ]
+  },
+  {
+    "teamNo": "B12",
+    "div": "B",
+    "guideRaw": "Ms.Sadaf Anjum Savanur",
+    "guideClean": "Sadaf Anjum Savanur",
+    "title": "HTTP Proxy Server with Caching (Sadaf)",
+    "theme": "Networking, Protocols & Streaming",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Adarsh MR",
+        "rollNo": "244",
+        "srn": "01FE24BCI011",
+        "email": "01fe24bci011@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 6.7
+      },
+      {
+        "slot": 2,
+        "name": "Krish Janagekar",
+        "rollNo": "245",
+        "srn": "01FE24BCI097",
+        "email": "01fe24bci097@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.71
+      },
+      {
+        "slot": 3,
+        "name": "Vivek Raikar",
+        "rollNo": "246",
+        "srn": "01FE25BCI704",
+        "email": "01fe25bci704@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.58
+      },
+      {
+        "slot": 4,
+        "name": "Akash",
+        "rollNo": "247",
+        "srn": "01FE24BCI123",
+        "email": "01fe24bci123@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.36
+      }
+    ]
+  },
+  {
+    "teamNo": "B13",
+    "div": "B",
+    "guideRaw": "Ms.Pooja P Shettar",
+    "guideClean": "Pooja P Shettar",
+    "title": "Resilient Multi-Peer File Distribution & Recovery Engine",
+    "theme": "Distributed Systems, File Sharing & Search",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Vineet",
+        "rollNo": "248",
+        "srn": "01FE24BCI093",
+        "email": "01fe24bci093@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.73
+      },
+      {
+        "slot": 2,
+        "name": "Manasa",
+        "rollNo": "249",
+        "srn": "01FE24BCI113",
+        "email": "01fe24bci113@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.77
+      },
+      {
+        "slot": 3,
+        "name": "Mahadev P",
+        "rollNo": "250",
+        "srn": "01FE24BCI116",
+        "email": "01fe24bci116@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.1
+      },
+      {
+        "slot": 4,
+        "name": "Arihant A N",
+        "rollNo": "251",
+        "srn": "01FE24BCI092",
+        "email": "01fe24bci092@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7
+      }
+    ]
+  },
+  {
+    "teamNo": "B14",
+    "div": "B",
+    "guideRaw": "Mr.Amit Kachavimath",
+    "guideClean": "Amit Kachavimath",
+    "title": "Adaptive Video Streaming & Buffer Management Engine",
+    "theme": "Networking, Protocols & Streaming",
+    "students": [
+      {
+        "slot": 1,
+        "name": "Renuka",
+        "rollNo": "252",
+        "srn": "01FE24BCI119",
+        "email": "01fe24bci119@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 8.81
+      },
+      {
+        "slot": 2,
+        "name": "Divya",
+        "rollNo": "253",
+        "srn": "01FE24BCI094",
+        "email": "01fe24bci094@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 9.34
+      },
+      {
+        "slot": 3,
+        "name": "B Bhagyashree",
+        "rollNo": "254",
+        "srn": "01FE24BCI104",
+        "email": "01fe24bci104@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 9.42
+      },
+      {
+        "slot": 4,
+        "name": "Akshay Bhat",
+        "rollNo": "255",
+        "srn": "01FE24BCI024",
+        "email": "01fe24bci024@kletech.ac.in",
+        "semester": 5,
+        "division": "B",
+        "cgpa": 7.6
+      }
+    ]
+  }
+]

@@ -38,8 +38,11 @@ function isReviewerUp() {
 // raising an issue - the one write everyone else (even Students) may do.
 function isReadOnlyOnly() {
   const roles = currentUser?.roles || [];
-  // Students see their own team's project read-only, like a Read-only Stakeholder.
-  return roles.length > 0 && roles.every((r) => r === 'READ_ONLY_STAKEHOLDER' || r === 'STUDENT');
+  // Students are NOT read-only: they can log their own challenges and add KPI measurements.
+  return roles.length > 0 && roles.every((r) => r === 'READ_ONLY_STAKEHOLDER');
+}
+function isCurrentUserStudent() {
+  return (currentUser?.roles || []).some((r) => r === 'STUDENT');
 }
 
 // Client-side hiding is a UX convenience only - the backend re-checks role
@@ -122,6 +125,11 @@ function switchSection(name) {
   document.querySelectorAll('.sub-pane').forEach((pane) => {
     pane.classList.toggle('d-none', pane.id !== `tab-${name}`);
   });
+  if (name === 'kpis') loadKpis();
+  if (name === 'challenges') loadChallengesAndActions();
+  if (name === 'milestones') loadMilestones();
+  if (name === 'reviews') loadReviews();
+  if (name === 'documentation') loadLinks();
 }
 
 function switchTab(tabName) {
@@ -342,15 +350,27 @@ async function loadKpis() {
       tbody.innerHTML = '<tr><td colspan="5" class="text-muted">No KPIs recorded yet.</td></tr>';
       return;
     }
-    tbody.innerHTML = kpis.map((k) => `
+    tbody.innerHTML = kpis.map((k) => {
+      // Students and Faculty Mentors can add measurements; HOD/Dean/Admin view only
+      const canAddMeasurement = isCurrentUserStudent() || isMentorUp();
+      const measureBtn = canAddMeasurement
+        ? `<button class="btn btn-sm btn-outline-secondary" data-add-measurement="${esc(k.id)}">📊 Add Update</button>`
+        : '<span class="text-muted" style="font-size:12px">View only</span>';
+      return `
       <tr>
-        <td><strong>${esc(k.name)}</strong></td>
+        <td>
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <strong>${esc(k.name)}</strong>
+            ${k.jira_issue_key ? `<a href="${esc(k.jira_url || '#')}" target="_blank" rel="noopener noreferrer" class="jira-tag" style="text-decoration:none;font-size:11px" title="View KPI in Jira">🏷️ ${esc(k.jira_issue_key)} ↗</a>` : ''}
+          </div>
+        </td>
         <td>${esc(k.target_value) || '<span class="text-muted">&ndash;</span>'} ${esc(k.unit) || ''}</td>
-        <td>${k.latest_measurement ? `${esc(k.latest_measurement.measured_value)} <span class="text-muted" style="font-size:12.5px">(${formatDate(k.latest_measurement.measured_at)})</span>` : '<span class="text-muted">No measurements</span>'}</td>
+        <td>${k.latest_measurement ? `${esc(k.latest_measurement.measured_value)} <span class="text-muted" style="font-size:12.5px">(${formatDate(k.latest_measurement.measured_at)})</span><br><span class="text-muted" style="font-size:11.5px">by ${esc(k.latest_measurement.recorded_by_name) || 'Unknown'}</span>` : '<span class="text-muted">No updates yet</span>'}</td>
         <td>${esc(k.owner_name) || '<span class="text-muted">&ndash;</span>'}</td>
-        <td><button class="btn btn-sm btn-outline-secondary" data-add-measurement="${esc(k.id)}">Add Measurement</button></td>
+        <td>${measureBtn}</td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
     tbody.querySelectorAll('[data-add-measurement]').forEach((btn) => {
       btn.addEventListener('click', () => {
         document.getElementById('measurementKpiId').value = btn.dataset.addMeasurement;
@@ -385,6 +405,30 @@ function openAddActionModal(preselectedIssueId) {
     }
   }
   actionModal.show();
+}
+
+// Student: open the issue modal pre-filled for editing their own challenge.
+// Faculty/HOD can also use this to edit any issue's content.
+function openEditIssueModal(issue) {
+  clearFormError('issueError');
+  const form = document.getElementById('issueForm');
+  if (form) form.reset();
+  // Pre-fill fields
+  const titleEl = document.getElementById('issueTitle');
+  const rcEl = document.getElementById('issueRootCause');
+  const impactEl = document.getElementById('issueImpact');
+  const supportEl = document.getElementById('issueSupportRequired');
+  if (titleEl) titleEl.value = issue.title || '';
+  if (rcEl) rcEl.value = issue.root_cause || '';
+  if (impactEl) impactEl.value = issue.impact || '';
+  if (supportEl) supportEl.value = issue.support_required || '';
+  // Store the issue id so submit knows it's an edit
+  const hiddenId = document.getElementById('issueEditId');
+  if (hiddenId) hiddenId.value = issue.id;
+  // Update modal title
+  const modalTitle = document.querySelector('#issueModal .modal-title');
+  if (modalTitle) modalTitle.textContent = 'Edit Challenge';
+  issueModal.show();
 }
 
 async function loadChallengesAndActions() {
@@ -428,7 +472,10 @@ async function loadChallengesAndActions() {
 
       // Column 1: Challenge / Issue
       const issueCol = `
-        <strong>${esc(i.title)}</strong>
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <strong>${esc(i.title)}</strong>
+          ${i.jira_issue_key ? `<a href="${esc(i.jira_url || '#')}" target="_blank" rel="noopener noreferrer" class="jira-tag" style="text-decoration:none;font-size:11px" title="View in Jira">🏷️ ${esc(i.jira_issue_key)} ↗</a>` : ''}
+        </div>
         <div class="text-muted" style="font-size:12.5px;margin-top:2px">
           Raised by ${esc(i.raised_by_name) || 'Unknown'} on ${formatDate(i.created_at)}
         </div>
@@ -473,8 +520,26 @@ async function loadChallengesAndActions() {
 
       // Column 5: Options
       let optionsCol = '';
-      if (!isStudent && mentorUp) {
+      const isStudent = isCurrentUserStudent();
+      if (isStudent) {
+        // Students: can only edit their OWN challenge (the one they raised)
+        const isOwnIssue = i.raised_by === currentUser?.id;
+        if (isOwnIssue) {
+          optionsCol = `<button class="btn btn-sm btn-outline-primary mb-1" data-edit-issue="${esc(i.id)}" title="Edit your challenge">✏️ Edit</button>`;
+        } else {
+          optionsCol = '<span class="text-muted" style="font-size:12px">Raised by teammate</span>';
+        }
+      } else if (mentorUp) {
         const addActionBtn = `<button class="btn btn-sm btn-outline-primary mb-1" data-add-action-for="${esc(i.id)}" data-challenge-title="${esc(i.title)}">+ Add Action</button>`;
+        // Status change buttons for Faculty/HOD/Admin
+        const statusBtns = [];
+        if (i.status === 'OPEN' || i.status === 'IN_PROGRESS') {
+          statusBtns.push(`<button class="btn btn-sm btn-outline-secondary mb-1" data-change-issue-status="${esc(i.id)}" data-new-status="IN_PROGRESS">Mark In Progress</button>`);
+          statusBtns.push(`<button class="btn btn-sm btn-outline-success mb-1" data-change-issue-status="${esc(i.id)}" data-new-status="RESOLVED">Mark Resolved</button>`);
+        }
+        if (i.status === 'RESOLVED') {
+          statusBtns.push(`<button class="btn btn-sm btn-outline-secondary mb-1" data-change-issue-status="${esc(i.id)}" data-new-status="CLOSED">Close</button>`);
+        }
         const actionOptionBtns = issueActions.map((a) => {
           const canVerify = isAuthorizedApprover() && a.status === 'COMPLETED';
           const canComplete = a.status === 'OPEN' || a.status === 'IN_PROGRESS';
@@ -488,7 +553,7 @@ async function loadChallengesAndActions() {
           return btns.join(' ');
         }).filter(Boolean).join('<br>');
 
-        optionsCol = `<div class="d-flex flex-column">${addActionBtn}${actionOptionBtns ? `<div class="mt-1">${actionOptionBtns}</div>` : ''}</div>`;
+        optionsCol = `<div class="d-flex flex-column">${addActionBtn}${statusBtns.length ? `<div class="mt-1">${statusBtns.join('')}</div>` : ''}${actionOptionBtns ? `<div class="mt-1">${actionOptionBtns}</div>` : ''}</div>`;
       } else {
         optionsCol = '<span class="text-muted">&ndash;</span>';
       }
@@ -524,6 +589,28 @@ async function loadChallengesAndActions() {
       btn.addEventListener('click', async () => {
         try {
           await Api.post(`/actions/${btn.dataset.verifyAction}/verify`, {});
+          loadChallengesAndActions();
+        } catch (err) {
+          alert(err.message);
+        }
+      });
+    });
+
+    // Student: Edit own challenge inline
+    tbody.querySelectorAll('[data-edit-issue]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const issueId = btn.dataset.editIssue;
+        const issue = loadedIssues.find((i) => String(i.id) === String(issueId));
+        if (!issue) return;
+        openEditIssueModal(issue);
+      });
+    });
+
+    // Faculty/HOD: Change challenge status
+    tbody.querySelectorAll('[data-change-issue-status]').forEach((btn) => {
+      btn.addEventListener('click', async () => {
+        try {
+          await Api.put(`/issues/${btn.dataset.changeIssueStatus}`, { status: btn.dataset.newStatus });
           loadChallengesAndActions();
         } catch (err) {
           alert(err.message);
@@ -949,6 +1036,15 @@ async function init() {
     });
   }
 
+  const btnNavKpis = document.getElementById('btnNavKpis');
+  if (btnNavKpis) {
+    btnNavKpis.addEventListener('click', () => {
+      switchTab('kpis');
+      const el = document.getElementById('tab-kpis');
+      if (el) el.scrollIntoView({ behavior: 'smooth' });
+    });
+  }
+
   function goToWorkspace(e) {
     if (e) e.preventDefault();
     const pid = projectId || getProjectId() || localStorage.getItem('al_active_project_id');
@@ -1028,16 +1124,44 @@ async function init() {
     }
   });
 
-  wireSimpleModal({
-    modal: issueModal, formId: 'issueForm', errorId: 'issueError', submitId: 'issueSubmit',
-    fields: [
-      { id: 'issueTitle', key: 'title', required: true },
-      { id: 'issueRootCause', key: 'rootCause' },
-      { id: 'issueImpact', key: 'impact' },
-      { id: 'issueSupportRequired', key: 'supportRequired' },
-    ],
-    endpoint: () => `/projects/${projectId}/issues`,
-    onSuccess: () => { loadChallengesAndActions(); },
+  // Issue modal: supports both CREATE (new challenge) and EDIT (student edits own challenge).
+  // If the hidden field #issueEditId has a value, it's an edit (PUT /issues/:id).
+  // Otherwise it's a new challenge (POST /projects/:id/issues).
+  document.getElementById('issueSubmit').addEventListener('click', async () => {
+    clearFormError('issueError');
+    const editId = document.getElementById('issueEditId')?.value?.trim();
+    const title = document.getElementById('issueTitle').value.trim();
+    const rootCause = document.getElementById('issueRootCause').value.trim();
+    const impact = document.getElementById('issueImpact').value.trim();
+    const supportRequired = document.getElementById('issueSupportRequired').value.trim();
+    if (!title) { showFormError('issueError', 'Challenge title is required.'); return; }
+    try {
+      if (editId) {
+        // Edit mode: student updating their own challenge
+        await Api.put(`/issues/${editId}`, { title, rootCause: rootCause || null, impact: impact || null, supportRequired: supportRequired || null });
+      } else {
+        // Create mode: new challenge
+        await Api.post(`/projects/${projectId}/issues`, { title, rootCause: rootCause || null, impact: impact || null, supportRequired: supportRequired || null });
+      }
+      issueModal.hide();
+      document.getElementById('issueForm').reset();
+      const hiddenId = document.getElementById('issueEditId');
+      if (hiddenId) hiddenId.value = '';
+      // Reset modal title
+      const modalTitle = document.querySelector('#issueModal .modal-title');
+      if (modalTitle) modalTitle.textContent = 'Log Challenge';
+      loadChallengesAndActions();
+    } catch (err) {
+      showFormError('issueError', err.message);
+    }
+  });
+
+  // Reset issueEditId when modal is dismissed without submitting
+  document.getElementById('issueModal').addEventListener('hidden.bs.modal', () => {
+    const hiddenId = document.getElementById('issueEditId');
+    if (hiddenId) hiddenId.value = '';
+    const modalTitle = document.querySelector('#issueModal .modal-title');
+    if (modalTitle) modalTitle.textContent = 'Log Challenge';
   });
 
   wireSimpleModal({
@@ -1127,13 +1251,32 @@ async function init() {
     }
   });
 
-  loadMilestones();
-  loadKpis();
-  loadChallengesAndActions();
-  loadReviews();
-  loadHistory();
-  loadLinks();
-  loadTeam();
+  async function refreshAllDashboardData() {
+    await Promise.all([
+      reloadProject(),
+      loadMilestones(),
+      loadKpis(),
+      loadChallengesAndActions(),
+      loadReviews(),
+      loadHistory(),
+      loadLinks(),
+      loadTeam()
+    ]);
+  }
+
+  window.ApniLeap = window.ApniLeap || {};
+  window.ApniLeap.onRefresh = refreshAllDashboardData;
+
+  const btnRefreshDashboard = document.getElementById('btnRefreshDashboard');
+  if (btnRefreshDashboard) {
+    btnRefreshDashboard.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.ApniLeap.triggerRefresh();
+    });
+  }
+
+  await refreshAllDashboardData();
 }
 
 document.addEventListener('DOMContentLoaded', init);
+

@@ -23,6 +23,9 @@
       <a class="nav-link d-none" id="navAdmin" href="administration.html">Administration</a>
     </div>
     <div class="d-flex align-items-center gap-2 ms-xl-auto mt-2 mt-xl-0">
+      <button class="btn btn-sm btn-outline-light d-flex align-items-center gap-1 btn-refresh-trigger" id="globalRefreshBtn" title="Refresh portfolio in-place">
+        <span class="refresh-spinner-icon">🔄</span> Refresh
+      </button>
       <span class="al-user-chip" id="userChip">&nbsp;</span>
       <button class="btn btn-sm btn-outline-light" id="logoutBtn">Logout</button>
     </div>
@@ -30,10 +33,15 @@
 </nav>
 
 <div class="al-page">
-  <div class="al-page-header">
+  <div class="al-page-header d-flex flex-wrap justify-content-between align-items-center gap-2">
     <div>
       <h1 class="al-page-title" id="pageTitle">ApniLeap Mini-Project Portfolio</h1>
       <p class="al-page-subtitle" id="pageSubtitle">Loading current portfolio status…</p>
+    </div>
+    <div>
+      <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1 btn-refresh-trigger" id="btnRefreshPage" title="Refresh portfolio in-place">
+        <span class="refresh-spinner-icon">🔄</span> Refresh
+      </button>
     </div>
   </div>
 

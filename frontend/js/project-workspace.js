@@ -91,13 +91,27 @@ function renderBreadcrumb() {
 
 function renderHeader(jiraLink) {
   document.getElementById('projectTitle').textContent = `${currentProject.title} — Workspace`;
+  const jiraBadge = jiraLink?.url
+    ? `<a href="${esc(jiraLink.url)}" target="_blank" rel="noopener noreferrer" class="jira-tag ms-1" style="text-decoration:none;font-weight:600" title="Open Jira Board">🔷 Jira Board (${esc(jiraLink.key)}) ↗</a>`
+    : '';
   document.getElementById('projectMeta').innerHTML = `
     <span><strong>${esc(currentProject.project_code)}</strong></span>
+    ${jiraBadge}
     <span class="text-muted">Team ID: <strong>${esc(currentProject.team_id || 'Team')}</strong></span>
     <span class="text-muted">Artefact ID: <strong>${esc(currentProject.artefact_id || 'Art')}</strong></span>
     <span class="text-muted">Faculty Mentor: ${esc(currentProject.mentor_name) || 'Unassigned'}</span>
   `;
   document.getElementById('btnBackDashboard').href = `project-dashboard.html?id=${encodeURIComponent(projectId)}`;
+
+  const btnBoard = document.getElementById('btnOpenJiraBoard');
+  if (btnBoard) {
+    if (jiraLink?.url) {
+      btnBoard.href = jiraLink.url;
+      btnBoard.classList.remove('d-none');
+    } else {
+      btnBoard.classList.add('d-none');
+    }
+  }
 }
 
 function populateAssigneeSelect() {
@@ -112,12 +126,24 @@ function populateAssigneeSelect() {
 }
 
 async function loadWorkspace() {
+  const btnSync = document.getElementById('btnSyncJira');
+  if (btnSync) {
+    btnSync.disabled = true;
+    btnSync.textContent = '🔄 Syncing…';
+  }
   try {
     const { tasks, jiraLink, project } = await Api.get(`/projects/${projectId}/workspace-tasks`);
     loadedTasks = tasks || [];
+    if (project) currentProject = Object.assign(currentProject || {}, project);
+    if (jiraLink) renderHeader(jiraLink);
     renderBoard();
   } catch (err) {
     document.getElementById('listTodo').innerHTML = `<div class="text-danger">${esc(err.message)}</div>`;
+  } finally {
+    if (btnSync) {
+      btnSync.disabled = false;
+      btnSync.textContent = '🔄 Sync Jira';
+    }
   }
 }
 
@@ -181,10 +207,17 @@ function renderColumn(containerId, tasks, columnStatus) {
       </div>
     ` : '';
 
+    const jiraUrl = t.jira_issue_key && !t.jira_issue_key.startsWith('PROJ')
+      ? `https://apnileap-portfolio.atlassian.net/browse/${encodeURIComponent(t.jira_issue_key)}`
+      : null;
+    const jiraTag = jiraUrl
+      ? `<a href="${jiraUrl}" target="_blank" rel="noopener noreferrer" class="jira-tag" style="text-decoration:none" title="Open in Jira">🔷 ${esc(t.jira_issue_key)} ↗</a>`
+      : `<span class="jira-tag">🔷 ${esc(t.jira_issue_key || 'Task')}</span>`;
+
     return `
       <div class="kanban-card" data-card-id="${esc(t.id)}">
         <div class="d-flex justify-content-between align-items-center mb-1">
-          <span class="jira-tag">🔷 ${esc(t.jira_issue_key || 'JIRA')}</span>
+          ${jiraTag}
           <span class="${priorityClass}">${esc(t.priority)}</span>
         </div>
         <div class="fw-semibold mb-1" style="font-size:14px">${esc(t.title)}</div>
@@ -409,7 +442,37 @@ async function init() {
     return;
   }
 
+  async function refreshWorkspaceData() {
+    try {
+      const [{ project, jiraLink }, { students }] = await Promise.all([
+        Api.get(`/projects/${projectId}`),
+        Api.get(`/projects/${projectId}/students`),
+      ]);
+      currentProject = project;
+      teamMembers = (students || []).map((s) => s.name).filter(Boolean);
+      if (project.mentor_name && !teamMembers.includes(project.mentor_name)) {
+        teamMembers.push(project.mentor_name);
+      }
+      renderBreadcrumb();
+      renderHeader(jiraLink);
+      populateAssigneeSelect();
+    } catch (e) {
+      console.warn('Workspace header reload warning:', e);
+    }
+    await loadWorkspace();
+  }
+
+  window.ApniLeap = window.ApniLeap || {};
+  window.ApniLeap.onRefresh = refreshWorkspaceData;
+
   // Attach button event listeners
+  const btnSync = document.getElementById('btnSyncJira');
+  if (btnSync) {
+    btnSync.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.ApniLeap.triggerRefresh();
+    });
+  }
   document.getElementById('btnCreateTask').addEventListener('click', () => openCreateModal('TODO'));
   document.querySelectorAll('[data-add-to]').forEach((btn) => {
     btn.addEventListener('click', () => openCreateModal(btn.dataset.addTo));
@@ -420,4 +483,4 @@ async function init() {
   await loadWorkspace();
 }
 
-document.addEventListener('DOMContentLoaded', init);
+document.addEventListener('DOMContentLoaded', init);

@@ -95,6 +95,9 @@
       <a class="nav-link d-none" id="navAdmin" href="administration.html">Administration</a>
     </div>
     <div class="d-flex align-items-center gap-2 ms-xl-auto mt-2 mt-xl-0">
+      <button class="btn btn-sm btn-outline-light d-flex align-items-center gap-1 btn-refresh-trigger" id="globalRefreshBtn" title="Refresh data in-place">
+        <span class="refresh-spinner-icon">🔄</span> Refresh
+      </button>
       <span class="al-user-chip" id="userChip">&nbsp;</span>
       <button class="btn btn-sm btn-outline-light" id="logoutBtn">Logout</button>
     </div>
@@ -115,6 +118,10 @@
       </div>
       <div class="d-flex flex-wrap gap-2">
         <a class="btn btn-outline-secondary btn-sm" id="btnBackDashboard" href="#">← Project Dashboard</a>
+        <a class="btn btn-outline-primary btn-sm d-none" id="btnOpenJiraBoard" href="#" target="_blank" rel="noopener noreferrer">🔷 Open Jira Board ↗</a>
+        <button class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1 btn-refresh-trigger" id="btnSyncJira" title="Sync latest cards from Jira">
+          <span class="refresh-spinner-icon">🔄</span> Sync Jira
+        </button>
         <button class="btn btn-al-primary btn-sm" id="btnCreateTask">+ Create Task</button>
       </div>
     </div>
