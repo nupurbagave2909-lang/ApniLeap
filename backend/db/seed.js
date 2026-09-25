@@ -345,10 +345,6 @@ async function seed() {
                 );
             }
 
-            // Sync sequences to avoid collisions
-            await client.query(`SELECT setval('artefact_id_seq', 200, true)`);
-            await client.query(`SELECT setval('team_id_seq', 200, true)`);
-
             // Clear existing students in CSEAI before re-inserting to prevent unique constraint collisions
             await client.query(`DELETE FROM project_students WHERE project_id IN (SELECT id FROM projects WHERE department_id = $1)`, [cseaiId]);
 
@@ -463,29 +459,26 @@ async function seed() {
         console.log('Student logins created:', studentLogins);
         console.log('Demo student teams created for', teamless.length, 'projects');
 
-        // 4. Seed Jira Board Links for AL-KLE-023 & AL-KLE-026
-        const jiraIntegrations = [
-            { code: 'AL-KLE-023', jiraKey: 'ALKLE023' },
-            { code: 'AL-KLE-026', jiraKey: 'ALKLE026' },
-        ];
-        for (const item of jiraIntegrations) {
-            const { rows: pRows } = await client.query(`SELECT id FROM projects WHERE project_code = $1`, [item.code]);
-            if (pRows.length) {
-                const pid = pRows[0].id;
-                const { rows: existing } = await client.query(
-                    `SELECT id FROM jira_links WHERE project_id = $1 AND jira_issue_key = $2`,
-                    [pid, item.jiraKey]
+        // 4. Seed Jira Board Links for ALL projects
+        const { rows: allProjs } = await client.query(`SELECT id, project_code FROM projects`);
+        for (const p of allProjs) {
+            let key = (p.project_code || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+            if (!key || !/^[A-Z]/.test(key)) key = `AL${key}`.slice(0, 10);
+            else key = key.slice(0, 10);
+            const { rows: existing } = await client.query(
+                `SELECT id FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_PROJECT'`,
+                [p.id]
+            );
+            if (!existing.length) {
+                await client.query(
+                    `INSERT INTO jira_links (project_id, jira_issue_key, jira_issue_id, link_type)
+                     VALUES ($1, $2, $2, 'JIRA_PROJECT')`,
+                    [p.id, key]
                 );
-                if (!existing.length) {
-                    await client.query(
-                        `INSERT INTO jira_links (project_id, jira_issue_key, jira_issue_id, link_type)
-                         VALUES ($1, $2, $2, 'JIRA_PROJECT')`,
-                        [pid, item.jiraKey]
-                    );
-                }
             }
         }
-        console.log('Jira integration links seeded for AL-KLE-023 & AL-KLE-026.');
+        console.log(`Jira integration links seeded for ${allProjs.length} projects.`);
+
 
         // 5. Seed default KPIs for AL-KLE-023 and AL-KLE-026
         const defaultKpis = [
@@ -602,7 +595,12 @@ async function seed() {
                 }
             }
         }
-        console.log('Default challenges and corrective actions seeded.');
+        // Realign sequences so that new project creation via UI / API does not collide
+        await client.query(`
+            SELECT setval('artefact_id_seq', GREATEST(COALESCE((SELECT MAX((regexp_match(artefact_id, '\\d+'))[1]::int) FROM projects), 200), 200), true);
+            SELECT setval('team_id_seq', GREATEST(COALESCE((SELECT MAX((regexp_match(team_id, '\\d+'))[1]::int), 200), 200), true);
+        `);
+        console.log('Database sequences aligned.');
 
         await client.query('COMMIT');
         console.log('\nSeed complete.');

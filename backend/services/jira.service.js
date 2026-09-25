@@ -66,12 +66,144 @@ function fromAdf(adf) {
     }
 }
 
-// Dynamically resolves target Jira project key:
-// 1. Matches project_code without punctuation (e.g. 'AL-KLE-023' -> 'ALKLE023')
-// 2. Or matches process.env.JIRA_PROJECT_KEY if valid
-// 3. Or falls back to the first available project in Jira
+let cachedLeadAccountId = null;
+async function getLeadAccountId() {
+    if (cachedLeadAccountId) return cachedLeadAccountId;
+    try {
+        const myself = await jiraFetch('/rest/api/3/myself');
+        if (myself?.accountId) {
+            cachedLeadAccountId = myself.accountId;
+            return cachedLeadAccountId;
+        }
+    } catch (e) {
+        console.error('Failed to get Jira myself accountId:', e.message);
+    }
+    return '712020:04d20609-af5a-4bde-ae4f-a570e53ac943';
+}
+
+function deriveJiraKey(projectCode) {
+    let key = (projectCode || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    if (!key || !/^[A-Z]/.test(key)) {
+        key = `AL${key}`.slice(0, 10);
+    } else {
+        key = key.slice(0, 10);
+    }
+    if (key.length < 2) key = `${key}PR`.slice(0, 10);
+    return key;
+}
+
+// Ensures a dedicated Jira software project and Kanban board exist for this project
+async function ensureJiraProject(project, poolClient = null) {
+    if (!isConfigured() || !project) return null;
+    const db = poolClient || require('../config/db').pool;
+
+    // 1. Check if already linked in database
+    const { rows: links } = await db.query(
+        `SELECT * FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_PROJECT' ORDER BY created_at DESC LIMIT 1`,
+        [project.id]
+    );
+
+    const key = links[0]?.jira_issue_key || deriveJiraKey(project.project_code);
+    let boardId = links[0]?.jira_issue_id && !isNaN(Number(links[0].jira_issue_id)) ? links[0].jira_issue_id : null;
+
+    try {
+        // 2. Check if Jira project exists
+        let jiraProject = null;
+        try {
+            jiraProject = await jiraFetch(`/rest/api/3/project/${key}`);
+        } catch (e) {
+            // Not found, need to create
+        }
+
+        if (!jiraProject || !jiraProject.id) {
+            const leadAccountId = await getLeadAccountId();
+            const projName = `${project.project_code || key} - ${project.title || key}`.slice(0, 80);
+            try {
+                jiraProject = await jiraFetch('/rest/api/3/project', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        key,
+                        name: projName,
+                        projectTypeKey: 'software',
+                        leadAccountId,
+                    }),
+                });
+            } catch (createErr) {
+                console.warn(`Could not create Jira project ${key} (might exist):`, createErr.message);
+                try { jiraProject = await jiraFetch(`/rest/api/3/project/${key}`); } catch (e) {}
+            }
+        }
+
+        // 3. Ensure Kanban board exists
+        if (!boardId) {
+            try {
+                const bRes = await jiraFetch(`/rest/agile/1.0/board?projectKeyOrId=${key}`);
+                if (bRes?.values && bRes.values.length > 0) {
+                    boardId = String(bRes.values[0].id);
+                } else {
+                    const filter = await jiraFetch('/rest/api/3/filter', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            name: `Filter for ${key} board`,
+                            jql: `project = "${key}" ORDER BY Rank ASC`,
+                        }),
+                    });
+                    if (filter?.id) {
+                        const board = await jiraFetch('/rest/agile/1.0/board', {
+                            method: 'POST',
+                            body: JSON.stringify({
+                                name: `${key} board`,
+                                type: 'kanban',
+                                filterId: Number(filter.id),
+                            }),
+                        });
+                        if (board?.id) boardId = String(board.id);
+                    }
+                }
+            } catch (boardErr) {
+                console.warn(`Could not verify/create board for ${key}:`, boardErr.message);
+            }
+        }
+
+        // 4. Insert or update jira_links
+        const boardUrl = boardId
+            ? `${baseUrl()}/jira/software/projects/${key}/boards/${boardId}`
+            : `${baseUrl()}/jira/software/projects/${key}/boards`;
+
+        if (!links.length) {
+            await db.query(
+                `INSERT INTO jira_links (project_id, jira_issue_key, jira_issue_id, link_type)
+                 VALUES ($1, $2, $3, 'JIRA_PROJECT')
+                 ON CONFLICT DO NOTHING`,
+                [project.id, key, boardId || key]
+            );
+        } else if (boardId && links[0].jira_issue_id !== boardId) {
+            await db.query(
+                `UPDATE jira_links SET jira_issue_id = $1 WHERE id = $2`,
+                [boardId, links[0].id]
+            );
+        }
+
+        return {
+            key,
+            boardId,
+            url: boardUrl,
+            link_type: 'JIRA_PROJECT',
+        };
+    } catch (err) {
+        console.error(`ensureJiraProject failed for ${project.project_code}:`, err.message);
+        return {
+            key,
+            url: `${baseUrl()}/jira/software/projects/${key}/boards`,
+            link_type: 'JIRA_PROJECT',
+        };
+    }
+}
+
+// Dynamically resolves target Jira project key
 async function resolveJiraProjectKey(project) {
-    const directKey = (project?.project_code || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    if (!project) return process.env.JIRA_PROJECT_KEY || 'KAN';
+    const directKey = deriveJiraKey(project?.project_code);
     if (directKey) {
         try {
             const p = await jiraFetch(`/rest/api/3/project/${directKey}`);
@@ -86,13 +218,12 @@ async function resolveJiraProjectKey(project) {
         } catch (e) { /* fallback */ }
     }
     try {
-        const list = await jiraFetch('/rest/api/3/project');
-        if (Array.isArray(list) && list.length > 0) {
-            return list[0].key;
-        }
+        const ensured = await ensureJiraProject(project);
+        if (ensured?.key) return ensured.key;
     } catch (e) { /* fallback */ }
     return envKey || 'KAN';
 }
+
 
 // Creates a Task issue in the configured Jira project for a mini-project
 async function createJiraIssue(project, projectKeyOverride = null) {
@@ -333,6 +464,9 @@ module.exports = {
     updateJiraIssue,
     getJiraIssue,
     resolveJiraProjectKey,
+    ensureJiraProject,
+    deriveJiraKey,
+    getLeadAccountId,
     fromAdf,
     toAdf,
 };

@@ -906,10 +906,25 @@ function renderIntegrationStatus() {
   const syncBtn = document.getElementById('btnSyncIntegrations');
   const mentorUp = isMentorUp();
 
+  const btnHeaderJiraBoard = document.getElementById('btnHeaderJiraBoard');
+  if (btnHeaderJiraBoard) {
+    if (currentJiraLink?.url) {
+      btnHeaderJiraBoard.href = currentJiraLink.url;
+      btnHeaderJiraBoard.classList.remove('d-none');
+    } else {
+      btnHeaderJiraBoard.classList.add('d-none');
+    }
+  }
+
   const parts = [];
+  const isBoard = currentJiraLink?.link_type === 'JIRA_PROJECT' || currentJiraLink?.url?.includes('/boards');
+  const jiraLabel = isBoard
+    ? `Jira Kanban Board: <a href="${esc(currentJiraLink.url)}" target="_blank" rel="noopener noreferrer" class="fw-bold">Open Board (${esc(currentJiraLink.key)}) ↗</a>`
+    : `Jira: <a href="${esc(currentJiraLink.url)}" target="_blank" rel="noopener noreferrer">${esc(currentJiraLink.key)}</a>`;
+
   parts.push(currentJiraLink
-    ? `<div class="mb-1">Jira: <a href="${esc(currentJiraLink.url)}" target="_blank" rel="noopener noreferrer">${esc(currentJiraLink.key)}</a></div>`
-    : `<div class="mb-1">Jira: <span class="text-muted">Not linked</span>${mentorUp ? ' <button class="btn btn-link btn-sm p-0" id="btnCreateJira">Create Issue</button>' : ''}</div>`);
+    ? `<div class="mb-1">${jiraLabel}</div>`
+    : `<div class="mb-1">Jira: <span class="text-muted">Not linked</span>${mentorUp ? ' <button class="btn btn-link btn-sm p-0" id="btnCreateJira">Create Board</button>' : ''}</div>`);
   parts.push(currentConfluenceLink
     ? `<div>Confluence: <a href="${esc(currentConfluenceLink.url)}" target="_blank" rel="noopener noreferrer">View Page</a></div>`
     : `<div>Confluence: <span class="text-muted">Not linked</span>${mentorUp ? ' <button class="btn btn-link btn-sm p-0" id="btnCreateConfluence">Create Page</button>' : ''}</div>`);
@@ -922,7 +937,7 @@ function renderIntegrationStatus() {
       ? `Confluence page: <a href="${esc(currentConfluenceLink.url)}" target="_blank" rel="noopener noreferrer">Open project documentation</a>`
       : 'Confluence page: not created yet (use the Overview tab to create one).');
     docParts.push(currentJiraLink
-      ? `Jira issue: <a href="${esc(currentJiraLink.url)}" target="_blank" rel="noopener noreferrer">${esc(currentJiraLink.key)}</a>`
+      ? `Jira Kanban: <a href="${esc(currentJiraLink.url)}" target="_blank" rel="noopener noreferrer">${esc(currentJiraLink.key)} Board ↗</a>`
       : 'Jira issue: not created yet.');
     docEl.innerHTML = docParts.join('<br>');
   }

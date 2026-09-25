@@ -30,28 +30,24 @@ async function listWorkspaceTasks(req, res, next) {
     try {
         const projectId = req.params.projectId;
 
-        // Fetch jira link if any
+        // Ensure Jira Project and Kanban board are dynamically resolved/provisioned for ANY project
+        let jiraInfo = null;
+        if (jiraService.isConfigured() && req.project) {
+            try {
+                jiraInfo = await jiraService.ensureJiraProject(req.project, pool);
+            } catch (e) {
+                console.warn('ensureJiraProject warning:', e.message);
+            }
+        }
+
         let { rows: jiraRows } = await pool.query(
-            `SELECT * FROM jira_links WHERE project_id = $1 ORDER BY created_at DESC LIMIT 1`,
+            `SELECT * FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_PROJECT' ORDER BY created_at DESC LIMIT 1`,
             [projectId]
         );
 
-        // Auto-detect project key for AL-KLE-023 and AL-KLE-026 if not in jira_links
-        let projectKey = jiraRows[0]?.jira_issue_key;
-        const projectCode = req.project?.project_code || '';
-        if (!projectKey && projectCode) {
-            const stripped = projectCode.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-            if (['ALKLE023', 'ALKLE026'].includes(stripped)) {
-                projectKey = stripped;
-                // Auto-create jira_link
-                await pool.query(
-                    `INSERT INTO jira_links (project_id, jira_issue_key, jira_issue_id, link_type)
-                     VALUES ($1, $2, $3, 'JIRA_PROJECT')
-                     ON CONFLICT DO NOTHING`,
-                    [projectId, projectKey, projectKey]
-                );
-            }
-        }
+        let projectKey = jiraInfo?.key || jiraRows[0]?.jira_issue_key || jiraService.deriveJiraKey(req.project?.project_code);
+        let boardUrl = jiraInfo?.url || (projectKey ? `${jiraService.baseUrl()}/jira/software/projects/${projectKey}/boards` : null);
+
 
         // Live Sync: Pull updates from Jira board into ApniLeap
         if (projectKey && jiraService.isConfigured()) {
@@ -158,9 +154,8 @@ async function listWorkspaceTasks(req, res, next) {
             }
         }
 
-        // Build proper Jira board URL
-        let boardUrl = null;
-        if (projectKey && jiraService.isConfigured()) {
+        // Build proper Jira board URL if not already set
+        if (!boardUrl && projectKey && jiraService.isConfigured()) {
             boardUrl = `${jiraService.baseUrl()}/jira/software/projects/${projectKey}/boards`;
         }
 

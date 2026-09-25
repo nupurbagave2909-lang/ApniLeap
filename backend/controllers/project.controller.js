@@ -38,10 +38,34 @@ async function getProject(req, res, next) {
         );
         if (!rows[0]) return res.status(404).json({ error: 'Project not found.' });
 
-        const { rows: jiraRows } = await pool.query(
-            `SELECT jira_issue_key, jira_issue_id, link_type, created_at FROM jira_links WHERE project_id = $1 ORDER BY created_at DESC LIMIT 1`,
+        let { rows: jiraRows } = await pool.query(
+            `SELECT jira_issue_key, jira_issue_id, link_type, created_at FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_PROJECT' ORDER BY created_at DESC LIMIT 1`,
             [req.params.projectId]
         );
+        if (!jiraRows[0]) {
+            const { rows: anyLinks } = await pool.query(
+                `SELECT jira_issue_key, jira_issue_id, link_type, created_at FROM jira_links WHERE project_id = $1 ORDER BY created_at DESC LIMIT 1`,
+                [req.params.projectId]
+            );
+            jiraRows = anyLinks;
+        }
+
+        // Auto-provision if missing
+        if (!jiraRows[0] && jiraService.isConfigured() && rows[0]) {
+            try {
+                const ensured = await jiraService.ensureJiraProject(rows[0], pool);
+                if (ensured) {
+                    jiraRows = [{
+                        jira_issue_key: ensured.key,
+                        jira_issue_id: String(ensured.boardId || ensured.key),
+                        link_type: 'JIRA_PROJECT',
+                    }];
+                }
+            } catch (e) {
+                console.warn('Auto-provision Jira in getProject warning:', e.message);
+            }
+        }
+
         const { rows: confluenceRows } = await pool.query(
             `SELECT confluence_page_id, page_url, created_at FROM confluence_links WHERE project_id = $1 ORDER BY created_at DESC LIMIT 1`,
             [req.params.projectId]
@@ -51,7 +75,8 @@ async function getProject(req, res, next) {
         if (jiraRows[0]) {
             const baseUrl = (process.env.JIRA_BASE_URL || '').replace(/\/$/, '');
             if (jiraRows[0].link_type === 'JIRA_PROJECT') {
-                jiraUrl = `${baseUrl}/jira/software/projects/${jiraRows[0].jira_issue_key}/boards`;
+                const bId = jiraRows[0].jira_issue_id && !isNaN(Number(jiraRows[0].jira_issue_id)) ? `/${jiraRows[0].jira_issue_id}` : '';
+                jiraUrl = `${baseUrl}/jira/software/projects/${jiraRows[0].jira_issue_key}/boards${bId}`;
             } else {
                 jiraUrl = `${baseUrl}/browse/${jiraRows[0].jira_issue_key}`;
             }
@@ -331,15 +356,67 @@ async function provisionIntegrations(project, userId) {
 
     if (jiraService.isConfigured()) {
         try {
-            const jiraIssue = await jiraService.createJiraIssue(project);
-            jiraKey = jiraIssue.key;
-            await pool.query(
-                `INSERT INTO jira_links (project_id, jira_issue_key, jira_issue_id, link_type) VALUES ($1,$2,$3,'PROJECT')`,
-                [project.id, jiraIssue.key, jiraIssue.id]
+            // 1. Auto-provision dedicated Jira software project & Kanban board
+            const ensured = await jiraService.ensureJiraProject(project, pool);
+            jiraKey = ensured?.key;
+            if (jiraKey) {
+                await logAudit({ userId, action: 'JIRA_PROJECT_CREATE', entityType: 'project', entityId: project.id, instituteId: project.institute_id, details: { jiraKey } });
+            }
+
+            // 2. Populate starter Kanban tasks on the new project's board
+            const pCode = project.project_code || jiraKey;
+            const starterTasks = [
+                {
+                    title: 'System Architecture & Requirements Specification',
+                    description: 'Define technical stack, architecture diagrams, interfaces, and deliverables.',
+                    status: 'COMPLETED',
+                    priority: 'HIGH',
+                },
+                {
+                    title: 'Core Module Implementation & Integration',
+                    description: 'Develop foundational module logic, algorithms, and service interfaces.',
+                    status: 'IN_PROGRESS',
+                    priority: 'HIGH',
+                },
+                {
+                    title: 'Validation, Testing & Project Demonstration',
+                    description: 'Execute unit/integration tests, benchmark performance, and prepare evaluation demo.',
+                    status: 'TODO',
+                    priority: 'MEDIUM',
+                },
+            ];
+
+            const { rows: studentRows } = await pool.query(
+                `SELECT name FROM project_students WHERE project_id = $1 ORDER BY slot ASC`,
+                [project.id]
             );
-            await logAudit({ userId, action: 'JIRA_ISSUE_CREATE', entityType: 'project', entityId: project.id, instituteId: project.institute_id, details: { jiraKey } });
+
+            for (let idx = 0; idx < starterTasks.length; idx++) {
+                const item = starterTasks[idx];
+                const assignee = studentRows[idx]?.name || project.mentor_name || null;
+                let taskJiraKey = null;
+                if (jiraKey) {
+                    try {
+                        const issue = await jiraService.createWorkspaceTaskIssue(jiraKey, item.title, item.description);
+                        taskJiraKey = issue.key;
+                        if (item.status !== 'TODO') {
+                            await jiraService.updateJiraIssueStatus(taskJiraKey, item.status);
+                        }
+                    } catch (e) {
+                        console.warn(`Could not push starter task to Jira for ${jiraKey}:`, e.message);
+                    }
+                }
+                if (!taskJiraKey) {
+                    taskJiraKey = `${pCode}-${101 + idx}`;
+                }
+                await pool.query(
+                    `INSERT INTO workspace_tasks (project_id, title, description, status, priority, assignee_name, jira_issue_key)
+                     VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+                    [project.id, item.title, item.description, item.status, item.priority, assignee, taskJiraKey]
+                );
+            }
         } catch (err) {
-            console.error(`Jira issue creation failed for project ${project.id} (non-fatal):`, err.message);
+            console.error(`Jira provisioning failed for project ${project.id} (non-fatal):`, err.message);
         }
     }
 

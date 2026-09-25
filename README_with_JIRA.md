@@ -12,7 +12,7 @@ ApniLeap is an enterprise academic project governance platform designed for mult
 ## Table of Contents
 1. [Key Features](#key-features)
 2. [Jira Integration Architecture](#jira-integration-architecture)
-   - [Target Projects: ALKLE023 & ALKLE026](#target-projects-alkle023--alkle026)
+   - [Universal Multi-Project Kanban Board Integration](#universal-multi-project-kanban-board-integration)
    - [Bidirectional Kanban Synchronization](#bidirectional-kanban-synchronization)
    - [Challenges / Issues Sync to Jira](#challenges--issues-sync-to-jira)
    - [KPI Tracking & Jira Reflection](#kpi-tracking--jira-reflection)
@@ -63,14 +63,24 @@ The portal integrates directly with **Atlassian Jira Cloud** using Jira REST API
 └─────────────────────────────────┘                 └─────────────────────────────────┘
 ```
 
-### Target Projects: ALKLE023 & ALKLE026
+### Universal Multi-Project Kanban Board Integration
 
-The platform is pre-configured and linked to two dedicated Jira Kanban boards:
+Every project in the ApniLeap portfolio is seamlessly integrated with its own dedicated **Jira Software Project** and **Kanban Board** on Jira Cloud (`https://apnileap-portfolio.atlassian.net`):
 
-| ApniLeap Project Code | Jira Project Key | Project Name | Jira Board URL |
-|:----------------------|:-----------------|:-------------|:---------------|
-| `AL-KLE-023` | `ALKLE023` | Adaptive Video Streaming & Buffer Management Engine | `https://apnileap-portfolio.atlassian.net/jira/software/projects/ALKLE023/boards/2` |
-| `AL-KLE-026` | `ALKLE026` | Smart Campus Lab & Resource Optimizer | `https://apnileap-portfolio.atlassian.net/jira/software/projects/ALKLE026/boards/3` |
+- **40+ Pre-Configured Live Projects**: Every project code (`AL-KLE-001` through `AL-KLE-053`) has its own Jira Software project (`ALKLE001` - `ALKLE053`), custom Agile JQL filter, and interactive Kanban board.
+- **Dynamic On-The-Fly Provisioning**: When a Faculty Mentor, Department Head (HOD), Dean, or Administrator creates a new project via the ApniLeap UI or API:
+  1. The platform generates the project record and teams in PostgreSQL.
+  2. ApniLeap automatically calls the Jira Cloud REST API (`POST /rest/api/3/project`) to provision a dedicated software project (e.g. `ALKLE053`).
+  3. It automatically provisions a JQL filter (`project = "KEY" ORDER BY Rank ASC`) and creates an Agile Kanban board (`POST /rest/agile/1.0/board`).
+  4. It populates starter engineering tasks directly onto the new Jira Kanban board across columns (`System Architecture & Requirements Specification` $\rightarrow$ Done, `Core Module Implementation & Integration` $\rightarrow$ In Progress, `Validation, Testing & Project Demonstration` $\rightarrow$ To Do) with student assignees.
+  5. The Kanban board link (`https://apnileap-portfolio.atlassian.net/jira/software/projects/<KEY>/boards`) is automatically saved and made directly accessible in the UI.
+
+| ApniLeap Project Code | Jira Project Key | Board Type | Auto-Provisioned Features |
+|:----------------------|:-----------------|:-----------|:--------------------------|
+| `AL-KLE-001` to `AL-KLE-052` | `ALKLE001` to `ALKLE052` | Software Kanban | Dedicated Board, JQL filter, Bi-directional Task Sync |
+| `AL-KLE-023` | `ALKLE023` | Software Kanban | Pre-populated Tasks, Challenges, KPIs, Live Sync |
+| `AL-KLE-026` | `ALKLE026` | Software Kanban | Pre-populated Tasks, Challenges, KPIs, Live Sync |
+| **New Projects (e.g. `AL-KLE-053+`)** | Dynamic (`ALKLE053+`) | Software Kanban | **Zero-touch auto-provisioning**, Starter Tasks, Assignees |
 
 ### Bidirectional Kanban Synchronization
 
@@ -99,7 +109,7 @@ Jira software boards have project-specific transition workflows. ApniLeap dynami
 - When a challenge is logged under **Project Tracking $\rightarrow$ Challenges & Actions**:
   - The challenge is recorded in the PostgreSQL `issues` table.
   - ApniLeap automatically triggers `createJiraIssueForChallenge()`.
-  - It creates a corresponding Jira issue in the linked project (`ALKLE023` or `ALKLE026`):
+  - It creates a corresponding Jira issue in the linked project (`ALKLE***`):
     - **Issue Type**: `Task` or `Bug`
     - **Summary**: `[Challenge] <Title>`
     - **Description**: Documented Root Cause, Business/Academic Impact, and Support Required.
