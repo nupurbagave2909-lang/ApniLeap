@@ -134,13 +134,22 @@ async function ensureJiraProject(project, poolClient = null) {
             }
         }
 
-        // 3. Ensure Kanban board exists
-        if (!boardId) {
-            try {
-                const bRes = await jiraFetch(`/rest/agile/1.0/board?projectKeyOrId=${key}`);
+        // 3. Ensure Kanban board exists with proper project location
+        try {
+            const bRes = await jiraFetch(`/rest/agile/1.0/board?projectKeyOrId=${key}`);
+            const validBoard = bRes?.values?.find((b) => b.location?.projectKey === key);
+            if (validBoard) {
+                boardId = String(validBoard.id);
+            } else {
+                let filterId = null;
                 if (bRes?.values && bRes.values.length > 0) {
-                    boardId = String(bRes.values[0].id);
-                } else {
+                    try {
+                        const cfg = await jiraFetch(`/rest/agile/1.0/board/${bRes.values[0].id}/configuration`);
+                        filterId = cfg?.filter?.id;
+                        await jiraFetch(`/rest/agile/1.0/board/${bRes.values[0].id}`, { method: 'DELETE' });
+                    } catch (e) {}
+                }
+                if (!filterId) {
                     const filter = await jiraFetch('/rest/api/3/filter', {
                         method: 'POST',
                         body: JSON.stringify({
@@ -148,21 +157,26 @@ async function ensureJiraProject(project, poolClient = null) {
                             jql: `project = "${key}" ORDER BY Rank ASC`,
                         }),
                     });
-                    if (filter?.id) {
-                        const board = await jiraFetch('/rest/agile/1.0/board', {
-                            method: 'POST',
-                            body: JSON.stringify({
-                                name: `${key} board`,
-                                type: 'kanban',
-                                filterId: Number(filter.id),
-                            }),
-                        });
-                        if (board?.id) boardId = String(board.id);
-                    }
+                    filterId = filter?.id;
                 }
-            } catch (boardErr) {
-                console.warn(`Could not verify/create board for ${key}:`, boardErr.message);
+                if (filterId) {
+                    const newBoard = await jiraFetch('/rest/agile/1.0/board', {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            name: `${key} board`,
+                            type: 'kanban',
+                            filterId: Number(filterId),
+                            location: {
+                                type: 'project',
+                                projectKeyOrId: key,
+                            },
+                        }),
+                    });
+                    if (newBoard?.id) boardId = String(newBoard.id);
+                }
             }
+        } catch (boardErr) {
+            console.warn(`Could not verify/create board for ${key}:`, boardErr.message);
         }
 
         // 4. Insert or update jira_links
@@ -469,4 +483,5 @@ module.exports = {
     getLeadAccountId,
     fromAdf,
     toAdf,
+    jiraFetch,
 };
