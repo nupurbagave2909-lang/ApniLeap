@@ -158,6 +158,14 @@ async function ensureJiraProject(project, poolClient = null) {
                         }),
                     });
                     filterId = filter?.id;
+                    if (filterId) {
+                        try {
+                            await jiraFetch(`/rest/api/3/filter/${filterId}/permission`, {
+                                method: 'POST',
+                                body: JSON.stringify({ type: 'authenticated' })
+                            });
+                        } catch (e) {}
+                    }
                 }
                 if (filterId) {
                     const newBoard = await jiraFetch('/rest/agile/1.0/board', {
@@ -175,6 +183,18 @@ async function ensureJiraProject(project, poolClient = null) {
                     if (newBoard?.id) boardId = String(newBoard.id);
                 }
             }
+
+            // Ensure Nupur and admins have Administrators role in this project
+            try {
+                const roles = await jiraFetch(`/rest/api/3/project/${key}/role`);
+                if (roles?.Administrators) {
+                    const adminUrl = roles.Administrators.replace(baseUrl(), '');
+                    await jiraFetch(adminUrl, {
+                        method: 'POST',
+                        body: JSON.stringify({ user: ['712020:b45f0add-c266-4481-8388-fc6d4dac8035'] })
+                    });
+                }
+            } catch (roleErr) {}
         } catch (boardErr) {
             console.warn(`Could not verify/create board for ${key}:`, boardErr.message);
         }
