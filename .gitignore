@@ -14,3 +14,9 @@ backend/db/backup_*.sql
 # Logs and local tooling
 *.log
 .claude/
+
+# Temporary files and Office locks
+~$*
+*.tmp
+.DS_Store
+Thumbs.db
