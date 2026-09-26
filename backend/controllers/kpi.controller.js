@@ -11,10 +11,10 @@ async function listKpis(req, res, next) {
         const projectId = req.params.projectId;
         const project = req.project || await loadProject(projectId);
 
-        // 1. Sync from Jira if linked (e.g. ALKLE023, ALKLE026)
+        // 1. Sync from Jira if linked
         if (project && jiraService.isConfigured()) {
             const projectKey = (project.project_code || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-            if (['ALKLE023', 'ALKLE026'].includes(projectKey)) {
+            if (projectKey) {
                 try {
                     const jiraIssues = await jiraService.fetchJiraProjectIssues(projectKey);
                     for (const ji of jiraIssues) {
@@ -48,6 +48,30 @@ async function listKpis(req, res, next) {
                 } catch (e) {
                     console.error('Jira KPI sync error (non-fatal):', e.message);
                 }
+
+                // Check for any existing KPIs on this project that lack Jira keys and link them
+                try {
+                    const { rows: unlinked } = await pool.query(
+                        `SELECT id, name, target_value, unit FROM kpis WHERE project_id = $1 AND (jira_issue_key IS NULL OR jira_issue_key = '')`,
+                        [projectId]
+                    );
+                    for (const u of unlinked) {
+                        try {
+                            const created = await jiraService.createJiraKpi(
+                                project,
+                                { name: u.name, targetValue: u.target_value, unit: u.unit },
+                                { fullName: 'Faculty Mentor' }
+                            );
+                            if (created?.key) {
+                                await pool.query(`UPDATE kpis SET jira_issue_key = $1 WHERE id = $2`, [created.key, u.id]);
+                            }
+                        } catch (e) {
+                            console.warn(`Could not sync unlinked KPI ${u.id} to Jira:`, e.message);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Unlinked KPI check error:', e.message);
+                }
             }
         }
 
@@ -62,12 +86,11 @@ async function listKpis(req, res, next) {
             for (const s of starterKpis) {
                 let jKey = null;
                 if (project && jiraService.isConfigured()) {
-                    const pKey = (project.project_code || '').replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
-                    if (['ALKLE023', 'ALKLE026'].includes(pKey)) {
-                        try {
-                            const created = await jiraService.createJiraKpi(project, { name: s.name, targetValue: s.target, unit: s.unit }, { fullName: 'Faculty Mentor' });
-                            jKey = created?.key;
-                        } catch (e) {}
+                    try {
+                        const created = await jiraService.createJiraKpi(project, { name: s.name, targetValue: s.target, unit: s.unit }, { fullName: 'Faculty Mentor' });
+                        jKey = created?.key;
+                    } catch (e) {
+                        console.warn(`Could not push starter KPI to Jira:`, e.message);
                     }
                 }
                 await pool.query(

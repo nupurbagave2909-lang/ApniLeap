@@ -411,6 +411,9 @@ async function init() {
     }
 
     const roles = currentUser?.roles || [];
+    const isGov = roles.some((r) =>
+      ['PLATFORM_ADMIN', 'GLOBAL_PROGRAMME_LEADER', 'INSTITUTE_ADMIN', 'DEAN_PRINCIPAL', 'DEPARTMENT_HEAD', 'REVIEWER'].includes(r)
+    );
     const isGuide = roles.includes('FACULTY_MENTOR') && (
       (project.mentor_user_id && project.mentor_user_id === currentUser.id) ||
       (currentUser.fullName && project.mentor_name &&
@@ -423,7 +426,7 @@ async function init() {
       (currentUser.projectIds || []).includes(project.id) ||
       (currentUser.srn && (students || []).some(s => s.srn === currentUser.srn))
     );
-    canCreateTask = Boolean(isGuide || isStudent);
+    canCreateTask = Boolean(isGov || isGuide || isStudent);
 
     const btnCreate = document.getElementById('btnCreateTask');
     if (btnCreate) {

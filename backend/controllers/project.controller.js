@@ -415,6 +415,29 @@ async function provisionIntegrations(project, userId) {
                     [project.id, item.title, item.description, item.status, item.priority, assignee, taskJiraKey]
                 );
             }
+
+            // 3. Populate starter KPIs with Jira issues
+            const starterKpis = [
+                { name: 'Model Inference & System Latency', target: '50', unit: 'ms' },
+                { name: 'Pipeline Throughput & Reliability', target: '99', unit: '%' },
+                { name: 'Test Coverage & Validation Accuracy', target: '85', unit: '%' },
+            ];
+            for (const s of starterKpis) {
+                let kpiJiraKey = null;
+                if (jiraKey) {
+                    try {
+                        const kpiIssue = await jiraService.createJiraKpi(project, { name: s.name, targetValue: s.target, unit: s.unit }, { fullName: project.mentor_name || 'Faculty Mentor' });
+                        kpiJiraKey = kpiIssue?.key;
+                    } catch (e) {
+                        console.warn(`Could not push starter KPI to Jira for ${jiraKey}:`, e.message);
+                    }
+                }
+                await pool.query(
+                    `INSERT INTO kpis (project_id, name, target_value, unit, jira_issue_key, owner_user_id)
+                     VALUES ($1, $2, $3, $4, $5, $6)`,
+                    [project.id, s.name, s.target, s.unit, kpiJiraKey, project.mentor_user_id || null]
+                );
+            }
         } catch (err) {
             console.error(`Jira provisioning failed for project ${project.id} (non-fatal):`, err.message);
         }

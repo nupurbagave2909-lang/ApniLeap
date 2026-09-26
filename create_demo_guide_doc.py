@@ -13,8 +13,10 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib import colors
 
 BASE_DIR = r"C:\Users\Nupur\ApniLeap"
-DOCX_PATH = os.path.join(BASE_DIR, "ApniLeap_Demo_Guide_and_Credentials.docx")
-PDF_PATH = os.path.join(BASE_DIR, "ApniLeap_Demo_Guide_and_Credentials.pdf")
+DOCX_PATH = os.path.join(BASE_DIR, "ApniLeap_Two_Projects_Demo_Credentials.docx")
+PDF_PATH = os.path.join(BASE_DIR, "ApniLeap_Two_Projects_Demo_Credentials.pdf")
+OLD_DOCX_PATH = os.path.join(BASE_DIR, "ApniLeap_Demo_Guide_and_Credentials.docx")
+OLD_PDF_PATH = os.path.join(BASE_DIR, "ApniLeap_Demo_Guide_and_Credentials.pdf")
 
 # Styling helper functions for docx
 def set_cell_background(cell, hex_color):
@@ -57,8 +59,7 @@ def generate_docx():
     doc = Document()
 
     # Page Margins
-    sections = doc.sections
-    for section in sections:
+    for section in doc.sections:
         section.top_margin = Inches(0.7)
         section.bottom_margin = Inches(0.7)
         section.left_margin = Inches(0.75)
@@ -73,7 +74,7 @@ def generate_docx():
     r_title.font.color.rgb = RGBColor(26, 54, 93) # Navy blue
 
     p_sub = doc.add_paragraph()
-    r_sub = p_sub.add_run("Demo Credentials, Project Creation & Dashboard Input Guide")
+    r_sub = p_sub.add_run("Demo Credentials, Project Creation & Dashboard Input Guide for Two New Projects")
     r_sub.font.name = "Calibri"
     r_sub.font.size = Pt(13)
     r_sub.font.color.rgb = RGBColor(49, 130, 206) # Medium blue
@@ -85,7 +86,7 @@ def generate_docx():
     r_meta.font.italic = True
     r_meta.font.color.rgb = RGBColor(113, 128, 150)
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+    doc.add_paragraph().paragraph_format.space_after = Pt(4)
 
     # Section 1: User Accounts & Credentials
     h1 = doc.add_heading(level=1)
@@ -107,13 +108,13 @@ def generate_docx():
     style_table_header(hdr)
 
     users_data = [
-        ("Platform Administrator", "admin@apnileap.org", "Demo@12345", "Global governance, cross-institutional oversight, user & policy management."),
-        ("Global Programme Leader", "gpl@apnileap.org", "Demo@12345", "High-level cross-institute portfolio drilldowns and status reviews."),
-        ("Dean / Principal (KLE)", "kle.dean@apnileap.org", "Demo@12345", "Institutional portfolio reviews, RAG governance approval, project creation across all departments."),
-        ("Head of Dept - CSE (AI)", "kle.hod.cseai@apnileap.org", "Demo@12345", "CSE-AI department project creation, mentor allocation, review approvals."),
-        ("Head of Dept - CSE", "kle.hod.cse@apnileap.org", "Demo@12345", "CSE department project creation, mentor reviews, portfolio governance."),
-        ("Faculty Mentor / Guide", "sujata.kotabagi@kletech.ac.in", "Demo@12345", "Mentored projects, milestone & KPI updates, challenge resolution, Kanban management."),
-        ("Student Account", "01fe23bcs001@kletech.ac.in", "Demo@12345", "Read/write project workspace, task movement, challenge reporting, evidence submission.")
+        ("Platform Administrator", "admin@apnileap.org", "Demo@12345", "Global governance, cross-institutional oversight, user management, unrestricted project creation."),
+        ("Dean / Principal (KLE)", "kle.dean@apnileap.org", "Demo@12345", "Institutional oversight, RAG governance approval, project creation across all institute departments."),
+        ("Head of Dept - CSE (AI)", "kle.hod.cseai@apnileap.org", "Demo@12345", "CSE-AI department project creation, mentor allocation, review approvals, workspace task actions."),
+        ("Head of Dept - CSE", "kle.hod.cse@apnileap.org", "Demo@12345", "CSE department project creation, mentor reviews, portfolio governance, workspace task actions."),
+        ("Faculty Mentor (CSE-AI)", "sujata.kotabagi@kletech.ac.in", "Demo@12345", "Assigned CSE-AI projects, milestone & KPI updates, challenge logging, Kanban management."),
+        ("Faculty Mentor (CSE)", "amit.kachavimath@kletech.ac.in", "Demo@12345", "Assigned CSE projects, milestone & KPI updates, challenge resolution, Kanban management."),
+        ("Student Account (Demo)", "01fe23bcs001@kletech.ac.in", "Demo@12345", "Student workspace view, Kanban card movement, challenge reporting, evidence submission.")
     ]
 
     for idx, (role, email, pwd, scope) in enumerate(users_data):
@@ -124,19 +125,19 @@ def generate_docx():
         row.cells[3].paragraphs[0].text = scope
         style_table_row(row, is_alt=(idx % 2 == 1))
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(10)
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
     # Section 2: Instructions to Insert New Project
     h2 = doc.add_heading(level=1)
-    r_h2 = h2.add_run("2. How Higher Authorities Insert a New Project")
+    r_h2 = h2.add_run("2. Step-by-Step Instructions to Insert a New Project")
     r_h2.font.color.rgb = RGBColor(26, 54, 93)
 
     steps = [
-        ("Step 1: Sign in with a Governance Account", "Log in at http://localhost:4000 with kle.hod.cseai@apnileap.org or kle.dean@apnileap.org (Password: Demo@12345)."),
-        ("Step 2: Navigate to Department & Theme", "Go to Departments -> Computer Science and Engineering (AI) -> Edge AI & Computer Vision (or any theme), then click '+ Add Project'."),
-        ("Step 3: Enter Project & Team Details", "Fill in the project title, artefact title, mentor name, academic year, semester, and the 4 student team members (details provided below)."),
-        ("Step 4: Save & Automated Jira Provisioning", "Click 'Save Project'. ApniLeap automatically creates the project, registers the Jira Cloud project, provisions a dedicated Kanban board, grants public authenticated permissions, and seeds starter tasks."),
-        ("Step 5: Verify on Dashboard & Jira", "Click the '[🔷 Jira Kanban Board ↗]' button on the Project Dashboard or Workspace to see the live board on Jira Cloud with all tasks pre-populated.")
+        ("Step 1: Sign in with a Governance Account", "Log in at http://localhost:4000 using kle.hod.cseai@apnileap.org, kle.hod.cse@apnileap.org, or kle.dean@apnileap.org (Password: Demo@12345)."),
+        ("Step 2: Navigate to Target Department & Theme", "On the Dashboard, click on the appropriate Department (e.g., Computer Science and Engineering (AI) or Computer Science and Engineering), select the Theme, then click '+ Add Project'."),
+        ("Step 3: Enter Project & Team Details", "Fill in Project Title, Artefact Title, Mentor Name, Academic Year (2026-27), Semester (Sem-5), and the 4 student team members from the tables below."),
+        ("Step 4: Save & Automated Jira Provisioning", "Click 'Save Project'. ApniLeap automatically creates the project, provisions a dedicated Jira Cloud Kanban board, shares permissions with authenticated users, and seeds starter tasks and KPIs."),
+        ("Step 5: Access Project Dashboard & Workspace", "Click 'Open →' or 'Project Workspace'. You will see the Jira Kanban board link [🔷 Jira Board ↗], interactive Kanban buttons (← To Do, In Progress →, Completed ✓), and clickable Jira issue hyperlinks on all KPIs and Challenges.")
     ]
 
     for title, desc in steps:
@@ -146,107 +147,96 @@ def generate_docx():
         r_st.font.color.rgb = RGBColor(43, 108, 176)
         p_step.add_run(desc)
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(10)
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
 
-    # Section 3: Sample Demo Project Data
+    # Section 3: Project 1 Details
     h3 = doc.add_heading(level=1)
-    r_h3 = h3.add_run("3. Ready-to-Copy Demo Project Input Data")
+    r_h3 = h3.add_run("3. Project 1: Autonomous Drone Edge-AI Pipeline for Crop & Canopy Health")
     r_h3.font.color.rgb = RGBColor(26, 54, 93)
 
-    doc.add_paragraph("Use the following sample values to test the 'Add Project' form:")
+    doc.add_paragraph("Use the following credentials and details to insert Project 1 into the CSE-AI department:")
 
-    proj_table = doc.add_table(rows=1, cols=2)
-    proj_table.alignment = WD_TABLE_ALIGNMENT.CENTER
-    hdr = proj_table.rows[0]
-    hdr.cells[0].paragraphs[0].text = "Form Field"
-    hdr.cells[1].paragraphs[0].text = "Input Value to Copy & Paste"
-    style_table_header(hdr, hex_color="2C5282")
+    p1_table = doc.add_table(rows=1, cols=2)
+    p1_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    hdr1 = p1_table.rows[0]
+    hdr1.cells[0].paragraphs[0].text = "Form Field"
+    hdr1.cells[1].paragraphs[0].text = "Value to Copy & Paste"
+    style_table_header(hdr1, hex_color="2C5282")
 
-    p_fields = [
-        ("Project Title", "Real-Time Edge AI Vision for Automated Defect Inspection"),
-        ("Artefact Title", "Automated Industrial Vision Defect Inspector"),
+    p1_fields = [
+        ("Department", "Computer Science and Engineering (AI)"),
+        ("Theme", "Edge AI & Computer Vision"),
+        ("Project Title", "Autonomous Drone Edge-AI Pipeline for Precision Crop & Canopy Health Monitoring"),
+        ("Artefact Title", "Edge-Deployed Aerial Multispectral Crop Health Inspector"),
         ("Academic Year", "2026-27"),
         ("Semester", "Sem-5"),
         ("Faculty Mentor", "Dr. Sujata Kotabagi"),
-        ("Department", "Computer Science and Engineering (AI)"),
-        ("Theme", "Edge AI & Computer Vision"),
-        ("Student 1 (Lead)", "Aditya Kulkarni | SRN: 01FE23BCS951 | Div: A | Sem: Sem-5"),
-        ("Student 2", "Pooja Patil | SRN: 01FE23BCS952 | Div: A | Sem: Sem-5"),
-        ("Student 3", "Siddharth Joshi | SRN: 01FE23BCS953 | Div: A | Sem: Sem-5"),
-        ("Student 4", "Sneha Hegde | SRN: 01FE23BCS954 | Div: A | Sem: Sem-5")
+        ("Student 1 (Lead)", "Rohan Deshpande | SRN: 01FE23BCS961 | Div: A | Sem: Sem-5"),
+        ("Student 2", "Ananya Kulkarni | SRN: 01FE23BCS962 | Div: A | Sem: Sem-5"),
+        ("Student 3", "Varun Hegde | SRN: 01FE23BCS963 | Div: A | Sem: Sem-5"),
+        ("Student 4", "Kavya Patil | SRN: 01FE23BCS964 | Div: A | Sem: Sem-5")
     ]
 
-    for idx, (fld, val) in enumerate(p_fields):
-        row = proj_table.add_row()
+    for idx, (fld, val) in enumerate(p1_fields):
+        row = p1_table.add_row()
         row.cells[0].paragraphs[0].text = fld
         row.cells[1].paragraphs[0].text = val
         style_table_row(row, is_alt=(idx % 2 == 1))
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(10)
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
 
-    # Section 4: Sample Challenges & Corrective Actions
-    h4 = doc.add_heading(level=1)
-    r_h4 = h4.add_run("4. Sample Challenges & Corrective Actions (For Dashboard Input)")
-    r_h4.font.color.rgb = RGBColor(26, 54, 93)
+    # Project 1 Challenges
+    p_c1_hdr = doc.add_paragraph()
+    r_c1_h = p_c1_hdr.add_run("Project 1 — Challenges to Log in Dashboard (Project Tracking -> Challenges):")
+    r_c1_h.font.bold = True
+    r_c1_h.font.color.rgb = RGBColor(197, 48, 48)
 
-    doc.add_paragraph("Navigate to Project Tracking -> Challenges & Actions tab in the project dashboard, click '+ Log Challenge', and paste any of the following items:")
-
-    challenges_data = [
+    p1_challenges = [
         {
-            "num": "Challenge 1",
-            "title": "GPU memory allocation exhaustion during high-resolution batch training",
-            "root_cause": "Full-resolution uncompressed video frames loaded simultaneously into host VRAM without streaming DataLoader buffers.",
-            "impact": "Training process crashes unexpectedly during epoch transitions, stalling model convergence.",
-            "support": "Lab administrator access to configure PyTorch CUDA memory caching allocator and high-capacity RAM node.",
+            "title": "Drone Edge Compute Thermal Throttling & In-Flight Frame Drop",
+            "root_cause": "Unthrottled multispectral image batching causes Jetson Orin compute node to exceed 85°C, reducing core clocks.",
+            "impact": "In-flight image processing frame rate drops from 45 FPS to 14 FPS, skipping crop canopy sections.",
+            "support": "Lab technician assistance to install lightweight heat pipe enclosure and active micro-fan cooling mount.",
             "status": "IN_PROGRESS",
-            "action": "Implement chunk-based streaming data loader using PyTorch IterableDataset and dynamic batch resizing.",
-            "owner": "Aditya Kulkarni",
-            "due": "7 days from today"
-        },
-        {
-            "num": "Challenge 2",
-            "title": "Multi-tenant model inferencing latency exceeding 50ms real-time SLA threshold",
-            "root_cause": "Concurrent inspection requests queue up on a single GPU stream without dynamic request batching.",
-            "impact": "Production line defect detection lags behind conveyor belt speed, risking uninspected components.",
-            "support": "Provisioning Triton Inference Server instance with NVIDIA TensorRT runtime acceleration.",
-            "status": "OPEN",
-            "action": "Deploy Triton dynamic batching scheduler to coalesce inference requests into micro-batches of 8.",
-            "owner": "Pooja Patil",
+            "action": "Implement dynamic thermal load management in CUDA kernels and cap batch pipeline frequency at 35 FPS.",
+            "owner": "Rohan Deshpande",
             "due": "5 days from today"
         },
         {
-            "num": "Challenge 3",
-            "title": "Severe class imbalance in defect dataset yielding elevated false-negative rates",
-            "root_cause": "Historical factory dataset contains over 98% non-defective samples, skewing classifier decision boundaries.",
-            "impact": "Critical surface micro-cracks fail detection criteria during automated inspection rounds.",
-            "support": "Faculty mentor review of synthetic augmentation techniques (CycleGAN / Diffusion models).",
+            "title": "Multispectral NDVI Calibration Drift Under Dynamic Solar Irradiance",
+            "root_cause": "Cloud cover variability alters ambient spectral intensity without dynamic downwelling light sensor compensation.",
+            "impact": "Calculated NDVI vegetation index values deviate by up to 22%, triggering false crop water stress alerts.",
+            "support": "Faculty review of solar irradiance normalisation equations and sensor calibration coefficient lookup table.",
             "status": "OPEN",
-            "action": "Apply Focal Loss optimization function and generate 500 synthetic defect samples via Albumentations pipeline.",
-            "owner": "Siddharth Joshi",
+            "action": "Integrate real-time incident sunshine sensor readings to normalize reflectance spectra frame-by-frame.",
+            "owner": "Ananya Kulkarni",
+            "due": "8 days from today"
+        },
+        {
+            "title": "Telemetry Packet Loss Over 2.4GHz Long-Range Drone-to-Base Radio Link",
+            "root_cause": "Dense campus tree canopy causes high multipath fading and Fresnel zone attenuation on 2.4GHz transceiver.",
+            "impact": "Ground station loses telemetry heartbeat intermittently during autonomous survey runs at perimeter boundaries.",
+            "support": "Procurement of 868MHz high-gain directional patch antenna and diversity receiver module from IoT lab.",
+            "status": "OPEN",
+            "action": "Switch command/telemetry link to 868MHz telemetry radio with packet retransmission buffers in MAVLink layer.",
+            "owner": "Varun Hegde",
             "due": "10 days from today"
         }
     ]
 
-    for ch in challenges_data:
-        p_c = doc.add_paragraph()
-        r_c = p_c.add_run(f"[{ch['num']}] {ch['title']}")
-        r_c.font.bold = True
-        r_c.font.size = Pt(11)
-        r_c.font.color.rgb = RGBColor(197, 48, 48)
-
+    for ch in p1_challenges:
         tbl = doc.add_table(rows=1, cols=2)
         tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
         hdr = tbl.rows[0]
-        hdr.cells[0].paragraphs[0].text = "Field"
+        hdr.cells[0].paragraphs[0].text = "Challenge Field"
         hdr.cells[1].paragraphs[0].text = "Content to Paste"
         style_table_header(hdr, hex_color="742A2A")
-
         fields = [
             ("Challenge Title", ch["title"]),
             ("Root Cause", ch["root_cause"]),
             ("Academic/System Impact", ch["impact"]),
             ("Support Required", ch["support"]),
-            ("Initial Status", ch["status"]),
+            ("Status", ch["status"]),
             ("Corrective Action Plan", ch["action"]),
             ("Action Owner", ch["owner"]),
             ("Target Due Date", ch["due"])
@@ -256,297 +246,555 @@ def generate_docx():
             row.cells[0].paragraphs[0].text = f
             row.cells[1].paragraphs[0].text = v
             style_table_row(row, is_alt=(idx % 2 == 1))
+        doc.add_paragraph().paragraph_format.space_after = Pt(4)
 
-        doc.add_paragraph().paragraph_format.space_after = Pt(6)
+    # Project 1 KPIs
+    p_k1_hdr = doc.add_paragraph()
+    r_k1_h = p_k1_hdr.add_run("Project 1 — Key Performance Indicators (Project Tracking -> KPIs):")
+    r_k1_h.font.bold = True
+    r_k1_h.font.color.rgb = RGBColor(44, 82, 130)
 
-    doc.add_paragraph().paragraph_format.space_after = Pt(10)
-
-    # Section 5: Sample KPIs & Measurements
-    h5 = doc.add_heading(level=1)
-    r_h5 = h5.add_run("5. Sample Key Performance Indicators (KPIs) & Measurements")
-    r_h5.font.color.rgb = RGBColor(26, 54, 93)
-
-    doc.add_paragraph("Navigate to Project Tracking -> KPIs tab in the project dashboard, click '+ Add KPI', and enter these quantitative engineering metrics:")
-
-    kpi_data = [
+    p1_kpis = [
         {
-            "num": "KPI 1",
-            "name": "End-to-End Defect Detection Latency",
-            "target": "45",
+            "name": "Canopy Anomaly Detection Inference Latency",
+            "target": "35",
             "unit": "ms",
-            "desc": "Total duration elapsed from camera sensor frame capture through neural inference to defect classification trigger.",
-            "measured": "38.2",
-            "evidence": "NVIDIA TensorRT benchmark log on Jetson Orin Nano with batch size 1 across 1,000 continuous test frames."
+            "desc": "Neural model execution latency per multispectral image frame on edge accelerator.",
+            "measured": "31.4",
+            "evidence": "TensorRT benchmark output logged across 1,000 flight images captured at 50m survey altitude."
         },
         {
-            "num": "KPI 2",
-            "name": "Mean Average Precision (mAP@0.50)",
-            "target": "92.5",
+            "name": "NDVI Vegetation Stress Classification Accuracy",
+            "target": "93.5",
             "unit": "%",
-            "desc": "Object detection accuracy metric for surface scratch and crack localization validated on held-out test split.",
-            "measured": "94.1",
-            "evidence": "PyTorch evaluation script output evaluating 1,200 annotated ground-truth test images."
+            "desc": "Accuracy of classifying crop health into healthy, water-stressed, and pathogen-affected categories.",
+            "measured": "94.8",
+            "evidence": "Confusion matrix analysis validated against ground-truth agronomist ground inspection samples."
         },
         {
-            "num": "KPI 3",
-            "name": "Camera Ingestion Pipeline Throughput",
-            "target": "60",
+            "name": "Aerial Video Ingestion Stream Rate",
+            "target": "45",
             "unit": "fps",
-            "desc": "Sustained frames-per-second processed by OpenCV GStreamer hardware-accelerated video decoding pipe.",
-            "measured": "62.4",
-            "evidence": "GStreamer pipeline telemetry timestamps logged over 15 minutes of uninterrupted industrial camera stream."
+            "desc": "Sustained frame processing throughput delivered by hardware-accelerated video decoding pipeline.",
+            "measured": "46.2",
+            "evidence": "DeepStream pipeline telemetry logs during continuous 20-minute autonomous flight session."
         },
         {
-            "num": "KPI 4",
-            "name": "Edge Device Power Dissipation",
-            "target": "15",
+            "name": "Drone Embedded Compute Power Draw",
+            "target": "14",
             "unit": "Watts",
-            "desc": "Total thermal design power drawn by edge accelerator during maximum-load continuous inference loops.",
-            "measured": "12.8",
-            "evidence": "Hardware power meter telemetry reading via Jetson jtop power rail monitoring utility."
+            "desc": "Continuous power drawn by flight companion edge computer during simultaneous inference and logging.",
+            "measured": "12.6",
+            "evidence": "Power rail telemetry readings recorded via Jetson jtop hardware power monitoring service."
         }
     ]
 
-    for k in kpi_data:
-        p_k = doc.add_paragraph()
-        r_k = p_k.add_run(f"[{k['num']}] {k['name']}")
-        r_k.font.bold = True
-        r_k.font.size = Pt(11)
-        r_k.font.color.rgb = RGBColor(44, 82, 130)
-
+    for k in p1_kpis:
         tbl = doc.add_table(rows=1, cols=2)
         tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
         hdr = tbl.rows[0]
         hdr.cells[0].paragraphs[0].text = "KPI Parameter"
         hdr.cells[1].paragraphs[0].text = "Value to Copy & Paste"
         style_table_header(hdr, hex_color="2B6CB0")
-
         fields = [
             ("KPI Name", k["name"]),
             ("Target Value", k["target"]),
             ("Unit", k["unit"]),
             ("Description", k["desc"]),
-            ("Sample Measured Value (for measurement update)", k["measured"]),
-            ("Verification Evidence Note", k["evidence"])
+            ("Sample Measured Value", k["measured"]),
+            ("Verification Evidence", k["evidence"])
         ]
         for idx, (f, v) in enumerate(fields):
             row = tbl.add_row()
             row.cells[0].paragraphs[0].text = f
             row.cells[1].paragraphs[0].text = v
             style_table_row(row, is_alt=(idx % 2 == 1))
+        doc.add_paragraph().paragraph_format.space_after = Pt(4)
 
-        doc.add_paragraph().paragraph_format.space_after = Pt(6)
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+    # Section 4: Project 2 Details
+    h4 = doc.add_heading(level=1)
+    r_h4 = h4.add_run("4. Project 2: Decentralized Campus Microgrid Energy Distribution Engine")
+    r_h4.font.color.rgb = RGBColor(26, 54, 93)
+
+    doc.add_paragraph("Use the following credentials and details to insert Project 2 into the CSE department:")
+
+    p2_table = doc.add_table(rows=1, cols=2)
+    p2_table.alignment = WD_TABLE_ALIGNMENT.CENTER
+    hdr2 = p2_table.rows[0]
+    hdr2.cells[0].paragraphs[0].text = "Form Field"
+    hdr2.cells[1].paragraphs[0].text = "Value to Copy & Paste"
+    style_table_header(hdr2, hex_color="2C5282")
+
+    p2_fields = [
+        ("Department", "Computer Science and Engineering"),
+        ("Theme", "Sustainable Campus & Smart Energy"),
+        ("Project Title", "Decentralized Campus Microgrid Energy Distribution & Load Forecasting Engine"),
+        ("Artefact Title", "Smart Microgrid Energy Balancer & Predictive Dispatcher"),
+        ("Academic Year", "2026-27"),
+        ("Semester", "Sem-5"),
+        ("Faculty Mentor", "Amit Kachavimath"),
+        ("Student 1 (Lead)", "Nikhil Rao | SRN: 01FE23BCS971 | Div: B | Sem: Sem-5"),
+        ("Student 2", "Deepa Shrestha | SRN: 01FE23BCS972 | Div: B | Sem: Sem-5"),
+        ("Student 3", "Karthik Bhat | SRN: 01FE23BCS973 | Div: B | Sem: Sem-5"),
+        ("Student 4", "Meera Kulkarni | SRN: 01FE23BCS974 | Div: B | Sem: Sem-5")
+    ]
+
+    for idx, (fld, val) in enumerate(p2_fields):
+        row = p2_table.add_row()
+        row.cells[0].paragraphs[0].text = fld
+        row.cells[1].paragraphs[0].text = val
+        style_table_row(row, is_alt=(idx % 2 == 1))
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(6)
+
+    # Project 2 Challenges
+    p_c2_hdr = doc.add_paragraph()
+    r_c2_h = p_c2_hdr.add_run("Project 2 — Challenges to Log in Dashboard (Project Tracking -> Challenges):")
+    r_c2_h.font.bold = True
+    r_c2_h.font.color.rgb = RGBColor(197, 48, 48)
+
+    p2_challenges = [
+        {
+            "title": "Solar Inverter Telemetry Desynchronization During Rapid Cloud Transients",
+            "root_cause": "Modbus RS485 polling cycle lags during rapid solar insolation dropouts, missing transient voltage spikes.",
+            "impact": "Microgrid inverter controller reacts with delay, causing transient campus substation power factor dip.",
+            "support": "Access to high-speed digital power meter gateway and Modbus-TCP hardware converter.",
+            "status": "IN_PROGRESS",
+            "action": "Migrate inverter telemetry polling from 1000ms serial cycle to 50ms event-driven Modbus-TCP broadcast socket.",
+            "owner": "Nikhil Rao",
+            "due": "6 days from today"
+        },
+        {
+            "title": "Peak-Hour Campus Load Forecasting Error Exceeding 10% on High-Variance Feeder",
+            "root_cause": "Standard ARIMA model fails to account for air conditioning chiller compressor start-stop cycles during lunch hours.",
+            "impact": "Storage battery bank discharges sub-optimally, incurring higher utility peak demand tariff charges.",
+            "support": "Historical 15-minute campus smart meter energy consumption logs for past 12 months from electrical department.",
+            "status": "OPEN",
+            "action": "Train a hybrid Temporal Fusion Transformer (TFT) incorporating weather forecasts and academic timetable features.",
+            "owner": "Deepa Shrestha",
+            "due": "9 days from today"
+        },
+        {
+            "title": "MQTT Sensor Telemetry Message Dropping Under Wi-Fi Access Point Congestion",
+            "root_cause": "Substation smart meter Wi-Fi modules share 2.4GHz channel with student mobile devices during class break intervals.",
+            "impact": "Up to 8% of energy consumption telemetry packets drop between 1:00 PM and 2:00 PM daily.",
+            "support": "Campus network team assistance to provision dedicated VLAN and QoS priority bandwidth for smart energy IoT devices.",
+            "status": "OPEN",
+            "action": "Enable MQTT QoS Level 1 with persistent local SQLite buffer queue on smart meters to retransmit dropped packets.",
+            "owner": "Karthik Bhat",
+            "due": "7 days from today"
+        }
+    ]
+
+    for ch in p2_challenges:
+        tbl = doc.add_table(rows=1, cols=2)
+        tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+        hdr = tbl.rows[0]
+        hdr.cells[0].paragraphs[0].text = "Challenge Field"
+        hdr.cells[1].paragraphs[0].text = "Content to Paste"
+        style_table_header(hdr, hex_color="742A2A")
+        fields = [
+            ("Challenge Title", ch["title"]),
+            ("Root Cause", ch["root_cause"]),
+            ("Academic/System Impact", ch["impact"]),
+            ("Support Required", ch["support"]),
+            ("Status", ch["status"]),
+            ("Corrective Action Plan", ch["action"]),
+            ("Action Owner", ch["owner"]),
+            ("Target Due Date", ch["due"])
+        ]
+        for idx, (f, v) in enumerate(fields):
+            row = tbl.add_row()
+            row.cells[0].paragraphs[0].text = f
+            row.cells[1].paragraphs[0].text = v
+            style_table_row(row, is_alt=(idx % 2 == 1))
+        doc.add_paragraph().paragraph_format.space_after = Pt(4)
+
+    # Project 2 KPIs
+    p_k2_hdr = doc.add_paragraph()
+    r_k2_h = p_k2_hdr.add_run("Project 2 — Key Performance Indicators (Project Tracking -> KPIs):")
+    r_k2_h.font.bold = True
+    r_k2_h.font.color.rgb = RGBColor(44, 82, 130)
+
+    p2_kpis = [
+        {
+            "name": "Microgrid Short-Term Load Forecast MAPE",
+            "target": "4.5",
+            "unit": "%",
+            "desc": "Mean Absolute Percentage Error for 1-hour-ahead building energy demand prediction.",
+            "measured": "3.8",
+            "evidence": "Python scikit-learn evaluation report comparing predicted vs actual meter readings across 500 test hours."
+        },
+        {
+            "name": "Automated Phase Balancing Response Time",
+            "target": "250",
+            "unit": "ms",
+            "desc": "Time elapsed from 3-phase current unbalance detection to battery inverter active power dispatch actuation.",
+            "measured": "185",
+            "evidence": "Oscilloscope and smart inverter timestamped telemetry log recording transient load step responses."
+        },
+        {
+            "name": "Solar Inverter Telemetry Ingestion Reliability",
+            "target": "99.8",
+            "unit": "%",
+            "desc": "Percentage of successful 5-second telemetry data points stored without packet loss or checksum corruption.",
+            "measured": "99.92",
+            "evidence": "PostgreSQL time-series database continuous ingestion audit query for 7-day operating period."
+        },
+        {
+            "name": "Peak Load Demand Reduction",
+            "target": "18.0",
+            "unit": "%",
+            "desc": "Percentage curtailment in utility grid peak demand achieved through predictive battery discharge shaving.",
+            "measured": "19.4",
+            "evidence": "Substation energy billing report comparing peak demand charges before and after automated shaving dispatch."
+        }
+    ]
+
+    for k in p2_kpis:
+        tbl = doc.add_table(rows=1, cols=2)
+        tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
+        hdr = tbl.rows[0]
+        hdr.cells[0].paragraphs[0].text = "KPI Parameter"
+        hdr.cells[1].paragraphs[0].text = "Value to Copy & Paste"
+        style_table_header(hdr, hex_color="2B6CB0")
+        fields = [
+            ("KPI Name", k["name"]),
+            ("Target Value", k["target"]),
+            ("Unit", k["unit"]),
+            ("Description", k["desc"]),
+            ("Sample Measured Value", k["measured"]),
+            ("Verification Evidence", k["evidence"])
+        ]
+        for idx, (f, v) in enumerate(fields):
+            row = tbl.add_row()
+            row.cells[0].paragraphs[0].text = f
+            row.cells[1].paragraphs[0].text = v
+            style_table_row(row, is_alt=(idx % 2 == 1))
+        doc.add_paragraph().paragraph_format.space_after = Pt(4)
+
+    doc.add_paragraph().paragraph_format.space_after = Pt(8)
+
+    # Section 5: Verification Checklist
+    h5 = doc.add_heading(level=1)
+    r_h5 = h5.add_run("5. Post-Creation Verification Checklist")
+    r_h5.font.color.rgb = RGBColor(26, 54, 93)
+
+    checklist_items = [
+        "Jira Cloud Board Provisioning: Look for '[🔷 Jira Board (KEY) ↗]' in the top-right header and click to verify the Jira software board opened.",
+        "Kanban Board Tasks: Open Project Workspace to verify that 3 starter tasks are present, interactive move buttons (← To Do, In Progress →, Completed ✓) are visible, and each task displays its '🔷 KEY-N ↗' Jira badge.",
+        "KPI Jira Integration: Open the KPIs tab to verify that starter and newly added KPIs display live '🔷 KEY-N ↗' badges linking directly to Jira tickets.",
+        "Challenge Jira Integration: Log any of the challenges above and confirm that an associated Jira ticket is generated with root cause and impact details.",
+        "Role Permissions: Test logging in as HOD, Dean, Faculty Mentor, and Student to verify correct role-based editing boundaries."
+    ]
+
+    for item in checklist_items:
+        p_chk = doc.add_paragraph()
+        r_c_box = p_chk.add_run("☑  ")
+        r_c_box.font.bold = True
+        r_c_box.font.color.rgb = RGBColor(40, 167, 69)
+        p_chk.add_run(item)
 
     # Save DOCX
     doc.save(DOCX_PATH)
     print(f"Successfully generated Word document: {DOCX_PATH}")
+    try:
+        doc.save(OLD_DOCX_PATH)
+        print(f"Also updated: {OLD_DOCX_PATH}")
+    except Exception as e:
+        print(f"Notice: Could not overwrite {OLD_DOCX_PATH} (may be open in Word): {e}")
 
 def generate_pdf():
     doc = SimpleDocTemplate(
         PDF_PATH,
         pagesize=letter,
-        leftMargin=40,
-        rightMargin=40,
-        topMargin=40,
-        bottomMargin=40
+        leftMargin=36,
+        rightMargin=36,
+        topMargin=36,
+        bottomMargin=36
     )
 
     styles = getSampleStyleSheet()
 
-    # Custom styles
     title_style = ParagraphStyle(
         'DocTitle',
         parent=styles['Heading1'],
-        fontName='Helvetica-Bold',
         fontSize=20,
         leading=24,
         textColor=colors.HexColor('#1A365D'),
+        fontName='Helvetica-Bold',
         spaceAfter=4
     )
-    sub_style = ParagraphStyle(
+
+    subtitle_style = ParagraphStyle(
         'DocSub',
         parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=12,
-        leading=16,
+        fontSize=11,
+        leading=14,
         textColor=colors.HexColor('#3182CE'),
-        spaceAfter=4
+        fontName='Helvetica-Bold',
+        spaceAfter=3
     )
+
     meta_style = ParagraphStyle(
         'DocMeta',
         parent=styles['Normal'],
-        fontName='Helvetica-Oblique',
         fontSize=8.5,
-        leading=12,
+        leading=11,
         textColor=colors.HexColor('#718096'),
-        spaceAfter=14
+        fontName='Helvetica-Oblique',
+        spaceAfter=8
     )
+
     h1_style = ParagraphStyle(
         'H1',
         parent=styles['Heading2'],
-        fontName='Helvetica-Bold',
-        fontSize=13,
-        leading=17,
+        fontSize=12,
+        leading=16,
         textColor=colors.HexColor('#1A365D'),
-        spaceBefore=12,
-        spaceAfter=6
+        fontName='Helvetica-Bold',
+        spaceBefore=8,
+        spaceAfter=4
     )
+
+    h2_style = ParagraphStyle(
+        'H2',
+        parent=styles['Heading3'],
+        fontSize=10,
+        leading=13,
+        textColor=colors.HexColor('#2C5282'),
+        fontName='Helvetica-Bold',
+        spaceBefore=6,
+        spaceAfter=3
+    )
+
     body_style = ParagraphStyle(
         'Body',
         parent=styles['Normal'],
-        fontName='Helvetica',
-        fontSize=8.5,
-        leading=11.5,
-        textColor=colors.HexColor('#2D3748')
+        fontSize=8,
+        leading=11,
+        textColor=colors.HexColor('#2D3748'),
+        fontName='Helvetica'
     )
-    bold_body = ParagraphStyle(
-        'BoldBody',
-        parent=body_style,
+
+    th_style = ParagraphStyle(
+        'TH',
+        parent=styles['Normal'],
+        fontSize=8,
+        leading=10,
+        textColor=colors.white,
         fontName='Helvetica-Bold'
     )
-    tbl_hdr_style = ParagraphStyle(
-        'TblHdr',
-        parent=styles['Normal'],
-        fontName='Helvetica-Bold',
-        fontSize=8.5,
-        leading=11,
-        textColor=colors.white
-    )
 
-    elements = []
+    story = []
 
-    # Header
-    elements.append(Paragraph("ApniLeap Mini-Project Portfolio Portal", title_style))
-    elements.append(Paragraph("Demo Credentials, Project Creation & Dashboard Input Guide", sub_style))
-    elements.append(Paragraph("Portal URL: http://localhost:4000  |  Jira Cloud: https://apnileap-portfolio.atlassian.net  |  Default Password: Demo@12345", meta_style))
-    elements.append(HRFlowable(width="100%", thickness=1, color=colors.HexColor('#CBD5E0'), spaceAfter=10))
+    # Title & Subtitle
+    story.append(Paragraph("ApniLeap Mini-Project Portfolio Portal", title_style))
+    story.append(Paragraph("Demo Credentials, Project Creation & Dashboard Input Guide for Two New Projects", subtitle_style))
+    story.append(Paragraph("Portal URL: http://localhost:4000  |  Jira Cloud: https://apnileap-portfolio.atlassian.net  |  Default Password: Demo@12345", meta_style))
+    story.append(HRFlowable(width="100%", thickness=1.5, color=colors.HexColor('#1A365D'), spaceAfter=8))
 
     # Section 1: User Accounts & Credentials
-    elements.append(Paragraph("1. Institutional User Accounts & Demo Credentials", h1_style))
-    elements.append(Paragraph("All seeded accounts use password: <b><font color='#C53030'>Demo@12345</font></b>", body_style))
-    elements.append(Spacer(1, 4))
+    story.append(Paragraph("1. Institutional User Accounts & Demo Credentials", h1_style))
+    story.append(Paragraph("All pre-configured user accounts are initialized with standard password: <b><font color='#C53030'>Demo@12345</font></b>", body_style))
+    story.append(Spacer(1, 4))
 
-    user_rows = [
-        [Paragraph("Role", tbl_hdr_style), Paragraph("Login Email", tbl_hdr_style), Paragraph("Password", tbl_hdr_style), Paragraph("Key Scope & Permissions", tbl_hdr_style)],
-        [Paragraph("<b>Platform Administrator</b>", body_style), Paragraph("admin@apnileap.org", body_style), Paragraph("Demo@12345", body_style), Paragraph("Full system config, policy, cross-institutional governance.", body_style)],
-        [Paragraph("<b>Global Programme Leader</b>", body_style), Paragraph("gpl@apnileap.org", body_style), Paragraph("Demo@12345", body_style), Paragraph("Cross-institutional portfolio status & review oversight.", body_style)],
-        [Paragraph("<b>Dean / Principal</b>", body_style), Paragraph("kle.dean@apnileap.org", body_style), Paragraph("Demo@12345", body_style), Paragraph("Institutional project oversight, RAG approvals, project creation.", body_style)],
-        [Paragraph("<b>Head of Dept - CSEAI</b>", body_style), Paragraph("kle.hod.cseai@apnileap.org", body_style), Paragraph("Demo@12345", body_style), Paragraph("CSEAI project creation, mentor allocation, review approvals.", body_style)],
-        [Paragraph("<b>Head of Dept - CSE</b>", body_style), Paragraph("kle.hod.cse@apnileap.org", body_style), Paragraph("Demo@12345", body_style), Paragraph("CSE department project creation, mentor reviews.", body_style)],
-        [Paragraph("<b>Faculty Mentor</b>", body_style), Paragraph("sujata.kotabagi@kletech.ac.in", body_style), Paragraph("Demo@12345", body_style), Paragraph("Mentored projects, KPI & challenge updates, Kanban tasks.", body_style)],
-        [Paragraph("<b>Student Account</b>", body_style), Paragraph("01fe23bcs001@kletech.ac.in", body_style), Paragraph("Demo@12345", body_style), Paragraph("Workspace access, task movement, challenge submission.", body_style)]
+    cred_data = [
+        [Paragraph("Role", th_style), Paragraph("Login Email", th_style), Paragraph("Password", th_style), Paragraph("Key Permissions & Access Scope", th_style)],
+        [Paragraph("Platform Admin", body_style), Paragraph("admin@apnileap.org", body_style), Paragraph("Demo@12345", body_style), Paragraph("Global governance, unrestricted project creation.", body_style)],
+        [Paragraph("Dean / Principal (KLE)", body_style), Paragraph("kle.dean@apnileap.org", body_style), Paragraph("Demo@12345", body_style), Paragraph("Institute governance, project creation across all departments.", body_style)],
+        [Paragraph("HOD - CSE (AI)", body_style), Paragraph("kle.hod.cseai@apnileap.org", body_style), Paragraph("Demo@12345", body_style), Paragraph("CSE-AI project creation, mentor allocation, review approvals.", body_style)],
+        [Paragraph("HOD - CSE", body_style), Paragraph("kle.hod.cse@apnileap.org", body_style), Paragraph("Demo@12345", body_style), Paragraph("CSE department project creation, mentor reviews, portfolio governance.", body_style)],
+        [Paragraph("Faculty Mentor (CSE-AI)", body_style), Paragraph("sujata.kotabagi@kletech.ac.in", body_style), Paragraph("Demo@12345", body_style), Paragraph("Assigned CSE-AI projects, milestone & KPI updates, challenge logging.", body_style)],
+        [Paragraph("Faculty Mentor (CSE)", body_style), Paragraph("amit.kachavimath@kletech.ac.in", body_style), Paragraph("Demo@12345", body_style), Paragraph("Assigned CSE projects, milestone & KPI updates, challenge resolution.", body_style)],
+        [Paragraph("Student Account (Demo)", body_style), Paragraph("01fe23bcs001@kletech.ac.in", body_style), Paragraph("Demo@12345", body_style), Paragraph("Project workspace view, task movement, evidence submission.", body_style)]
     ]
-    t_users = Table(user_rows, colWidths=[120, 150, 75, 185])
-    t_users.setStyle(TableStyle([
+
+    t_cred = Table(cred_data, colWidths=[105, 125, 65, 245])
+    t_cred.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#1A365D')),
+        ('ALIGN', (0,0), (-1,-1), 'LEFT'),
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
-        ('TOPPADDING', (0,0), (-1,-1), 4),
-        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#F7FAFC')]),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#E2E8F0'))
+        ('TOPPADDING', (0,0), (-1,-1), 3),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E0')),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#F7FAFC')])
     ]))
-    elements.append(t_users)
-    elements.append(Spacer(1, 10))
+    story.append(t_cred)
+    story.append(Spacer(1, 8))
 
-    # Section 2: How to Insert New Project
-    elements.append(Paragraph("2. How Higher Authorities Insert a New Project", h1_style))
-    steps = [
-        "<b>Step 1: Sign in with a Governance Account</b>: Log in at http://localhost:4000 with <code>kle.hod.cseai@apnileap.org</code> or <code>kle.dean@apnileap.org</code> (Password: <code>Demo@12345</code>).",
-        "<b>Step 2: Navigate to Department & Theme</b>: Go to Departments -> Computer Science and Engineering (AI) -> Edge AI & Computer Vision, then click '+ Add Project'.",
-        "<b>Step 3: Enter Project & Team Details</b>: Fill in the title, artefact title, mentor name, academic year, semester, and 4 student team members.",
-        "<b>Step 4: Automatic Jira Cloud Provisioning</b>: Click 'Save Project'. ApniLeap automatically provisions the Jira project, creates the Kanban board with project location, shares filter permissions with all logged-in users, and seeds starter tasks.",
-        "<b>Step 5: Verify on Dashboard & Jira</b>: Click '[🔷 Jira Kanban Board ↗]' on the Project Dashboard or Workspace to see the live board on Jira Cloud."
+    # Section 2: Instructions to Insert New Project
+    story.append(Paragraph("2. Step-by-Step Instructions to Insert a New Project", h1_style))
+    steps_pdf = [
+        "<b>Step 1: Sign in with a Governance Account:</b> Log in at http://localhost:4000 with kle.hod.cseai@apnileap.org or kle.dean@apnileap.org (Password: Demo@12345).",
+        "<b>Step 2: Navigate to Target Department:</b> Click on the Department, select the Theme, then click '+ Add Project'.",
+        "<b>Step 3: Enter Project & Team Details:</b> Copy and paste Title, Artefact, Mentor Name, Academic Year (2026-27), Semester (Sem-5), and 4 student SRNs from below.",
+        "<b>Step 4: Save & Automated Jira Provisioning:</b> Click 'Save Project'. ApniLeap provisions the Jira Cloud board, seeds tasks, and creates Jira-linked KPIs.",
+        "<b>Step 5: Verify on Dashboard & Workspace:</b> Click the '[🔷 Jira Board ↗]' button to open the live board, or open the workspace to interact with tasks."
     ]
-    for s in steps:
-        elements.append(Paragraph(f"• {s}", body_style))
-        elements.append(Spacer(1, 2))
-    elements.append(Spacer(1, 10))
+    for st in steps_pdf:
+        story.append(Paragraph(f"• {st}", body_style))
+        story.append(Spacer(1, 2))
+    story.append(Spacer(1, 6))
 
-    # Section 3: Ready-to-Copy Demo Project Input Data
-    elements.append(Paragraph("3. Ready-to-Copy Demo Project Input Data", h1_style))
-    p_data = [
-        [Paragraph("Form Field", tbl_hdr_style), Paragraph("Input Value to Copy & Paste", tbl_hdr_style)],
-        [Paragraph("<b>Project Title</b>", body_style), Paragraph("Real-Time Edge AI Vision for Automated Defect Inspection", body_style)],
-        [Paragraph("<b>Artefact Title</b>", body_style), Paragraph("Automated Industrial Vision Defect Inspector", body_style)],
-        [Paragraph("<b>Academic Year</b>", body_style), Paragraph("2026-27", body_style)],
-        [Paragraph("<b>Semester</b>", body_style), Paragraph("Sem-5", body_style)],
-        [Paragraph("<b>Faculty Mentor</b>", body_style), Paragraph("Dr. Sujata Kotabagi", body_style)],
-        [Paragraph("<b>Student 1 (Lead)</b>", body_style), Paragraph("Aditya Kulkarni | SRN: 01FE23BCS951 | Div: A | Sem: Sem-5", body_style)],
-        [Paragraph("<b>Student 2</b>", body_style), Paragraph("Pooja Patil | SRN: 01FE23BCS952 | Div: A | Sem: Sem-5", body_style)],
-        [Paragraph("<b>Student 3</b>", body_style), Paragraph("Siddharth Joshi | SRN: 01FE23BCS953 | Div: A | Sem: Sem-5", body_style)],
-        [Paragraph("<b>Student 4</b>", body_style), Paragraph("Sneha Hegde | SRN: 01FE23BCS954 | Div: A | Sem: Sem-5", body_style)],
+    # Section 3: Project 1 Details
+    story.append(Paragraph("3. Project 1: Autonomous Drone Edge-AI Pipeline for Crop & Canopy Health", h1_style))
+    p1_meta_data = [
+        [Paragraph("Form Field", th_style), Paragraph("Value to Copy & Paste", th_style)],
+        [Paragraph("Department", body_style), Paragraph("Computer Science and Engineering (AI)", body_style)],
+        [Paragraph("Theme", body_style), Paragraph("Edge AI & Computer Vision", body_style)],
+        [Paragraph("Project Title", body_style), Paragraph("Autonomous Drone Edge-AI Pipeline for Precision Crop & Canopy Health Monitoring", body_style)],
+        [Paragraph("Artefact Title", body_style), Paragraph("Edge-Deployed Aerial Multispectral Crop Health Inspector", body_style)],
+        [Paragraph("Academic Year / Sem", body_style), Paragraph("2026-27 / Sem-5", body_style)],
+        [Paragraph("Faculty Mentor", body_style), Paragraph("Dr. Sujata Kotabagi", body_style)],
+        [Paragraph("Student 1 (Lead)", body_style), Paragraph("Rohan Deshpande | SRN: 01FE23BCS961 | Div: A | Sem: Sem-5", body_style)],
+        [Paragraph("Student 2", body_style), Paragraph("Ananya Kulkarni | SRN: 01FE23BCS962 | Div: A | Sem: Sem-5", body_style)],
+        [Paragraph("Student 3", body_style), Paragraph("Varun Hegde | SRN: 01FE23BCS963 | Div: A | Sem: Sem-5", body_style)],
+        [Paragraph("Student 4", body_style), Paragraph("Kavya Patil | SRN: 01FE23BCS964 | Div: A | Sem: Sem-5", body_style)]
     ]
-    t_proj = Table(p_data, colWidths=[140, 390])
-    t_proj.setStyle(TableStyle([
+    t_p1 = Table(p1_meta_data, colWidths=[130, 410])
+    t_p1.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#2C5282')),
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
-        ('TOPPADDING', (0,0), (-1,-1), 4),
-        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#F7FAFC')]),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#E2E8F0'))
+        ('TOPPADDING', (0,0), (-1,-1), 2.5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E0')),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#F7FAFC')])
     ]))
-    elements.append(t_proj)
-    elements.append(Spacer(1, 10))
+    story.append(t_p1)
+    story.append(Spacer(1, 6))
 
-    # Section 4: Sample Challenges
-    elements.append(Paragraph("4. Sample Challenges & Corrective Actions (For Dashboard Input)", h1_style))
-    elements.append(Paragraph("Paste these items under <b>Project Tracking -> Challenges & Actions</b>:", body_style))
-    elements.append(Spacer(1, 4))
-
-    ch_items = [
-        ("Challenge 1: GPU memory exhaustion during batch training",
-         "Root Cause: Full-resolution uncompressed video frames loaded simultaneously into host VRAM.<br/>"
-         "Impact: Training process crashes during epoch transitions.<br/>"
-         "Support Required: Lab admin access to configure PyTorch CUDA memory allocator.<br/>"
-         "Action: Implement streaming DataLoader using PyTorch IterableDataset and dynamic resizing.<br/>"
-         "Owner: Aditya Kulkarni | Status: IN_PROGRESS | Due Date: 7 days from today"),
-        ("Challenge 2: Multi-tenant model inference latency exceeding 50ms SLA",
-         "Root Cause: Concurrent inspection requests queue on single GPU stream without dynamic batching.<br/>"
-         "Impact: Factory defect detection lags behind conveyor belt speed.<br/>"
-         "Support Required: Provision Triton Inference Server with NVIDIA TensorRT runtime.<br/>"
-         "Action: Deploy Triton dynamic batch scheduler to coalesce requests into micro-batches of 8.<br/>"
-         "Owner: Pooja Patil | Status: OPEN | Due Date: 5 days from today")
+    # Project 1 Challenges Table
+    story.append(Paragraph("<b>Project 1 Challenges to Log:</b>", h2_style))
+    p1_ch_data = [
+        [Paragraph("Challenge Title", th_style), Paragraph("Root Cause & Impact", th_style), Paragraph("Action Plan & Owner", th_style)],
+        [Paragraph("Drone Edge Compute Thermal Throttling", body_style), Paragraph("Kernel load causes Jetson Orin to hit 85°C. Video drops to 14 FPS, skipping canopy sections.", body_style), Paragraph("Cap batch frequency at 35 FPS, apply heat-pipe cooling.<br/><b>Owner:</b> Rohan Deshpande", body_style)],
+        [Paragraph("NDVI Calibration Drift Under Variable Sun", body_style), Paragraph("Cloud variability changes spectral intensity. NDVI deviates by 22% triggering false alerts.", body_style), Paragraph("Normalize reflectance spectra frame-by-frame using downwelling sensor.<br/><b>Owner:</b> Ananya Kulkarni", body_style)],
+        [Paragraph("Telemetry Packet Loss Over 2.4GHz Link", body_style), Paragraph("Dense tree canopy attenuates 2.4GHz signal, losing telemetry heartbeat at boundaries.", body_style), Paragraph("Switch link to 868MHz high-gain antenna with packet retransmission.<br/><b>Owner:</b> Varun Hegde", body_style)]
     ]
-    for ch_t, ch_b in ch_items:
-        t_ch = Table([
-            [Paragraph(f"<b>{ch_t}</b>", tbl_hdr_style)],
-            [Paragraph(ch_b, body_style)]
-        ], colWidths=[530])
-        t_ch.setStyle(TableStyle([
-            ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#742A2A')),
-            ('BACKGROUND', (0,1), (-1,1), colors.HexColor('#FFF5F5')),
-            ('BOTTOMPADDING', (0,0), (-1,-1), 5),
-            ('TOPPADDING', (0,0), (-1,-1), 5),
-            ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#FEB2B2'))
-        ]))
-        elements.append(t_ch)
-        elements.append(Spacer(1, 6))
+    t_p1_ch = Table(p1_ch_data, colWidths=[140, 210, 190])
+    t_p1_ch.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#742A2A')),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('TOPPADDING', (0,0), (-1,-1), 3),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E0')),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#F7FAFC')])
+    ]))
+    story.append(t_p1_ch)
+    story.append(Spacer(1, 6))
 
-    # Section 5: Sample KPIs
-    elements.append(Paragraph("5. Sample Key Performance Indicators (KPIs)", h1_style))
-    elements.append(Paragraph("Paste these items under <b>Project Tracking -> KPIs</b>:", body_style))
-    elements.append(Spacer(1, 4))
-
-    kpi_rows = [
-        [Paragraph("KPI Name", tbl_hdr_style), Paragraph("Target", tbl_hdr_style), Paragraph("Unit", tbl_hdr_style), Paragraph("Description & Sample Measurement", tbl_hdr_style)],
-        [Paragraph("<b>Defect Detection Latency</b>", body_style), Paragraph("45", body_style), Paragraph("ms", body_style), Paragraph("Total camera-to-classification duration.<br/><b>Sample Measure:</b> 38.2 ms (TensorRT benchmark on Jetson Orin Nano).", body_style)],
-        [Paragraph("<b>Mean Avg Precision (mAP@0.50)</b>", body_style), Paragraph("92.5", body_style), Paragraph("%", body_style), Paragraph("Scratch/crack detection accuracy.<br/><b>Sample Measure:</b> 94.1% on 1,200 annotated test images.", body_style)],
-        [Paragraph("<b>Camera Throughput</b>", body_style), Paragraph("60", body_style), Paragraph("fps", body_style), Paragraph("GStreamer hardware-accelerated decoding.<br/><b>Sample Measure:</b> 62.4 fps continuous stream.", body_style)],
-        [Paragraph("<b>Edge Device Power</b>", body_style), Paragraph("15", body_style), Paragraph("Watts", body_style), Paragraph("Maximum load power dissipation.<br/><b>Sample Measure:</b> 12.8 Watts via jtop telemetry.", body_style)]
+    # Project 1 KPIs Table
+    story.append(Paragraph("<b>Project 1 KPIs to Enter:</b>", h2_style))
+    p1_kpi_data = [
+        [Paragraph("KPI Name", th_style), Paragraph("Target", th_style), Paragraph("Measured", th_style), Paragraph("Evidence Note", th_style)],
+        [Paragraph("Canopy Anomaly Detection Latency", body_style), Paragraph("35 ms", body_style), Paragraph("31.4 ms", body_style), Paragraph("TensorRT benchmark output logged across 1,000 flight images.", body_style)],
+        [Paragraph("NDVI Vegetation Classification Accuracy", body_style), Paragraph("93.5 %", body_style), Paragraph("94.8 %", body_style), Paragraph("Validated against ground-truth agronomist inspection samples.", body_style)],
+        [Paragraph("Aerial Video Ingestion Stream Rate", body_style), Paragraph("45 fps", body_style), Paragraph("46.2 fps", body_style), Paragraph("DeepStream pipeline telemetry logs during 20-minute flight.", body_style)],
+        [Paragraph("Drone Embedded Compute Power Draw", body_style), Paragraph("14 Watts", body_style), Paragraph("12.6 Watts", body_style), Paragraph("Power rail telemetry recorded via Jetson jtop utility.", body_style)]
     ]
-    t_kpi = Table(kpi_rows, colWidths=[130, 45, 45, 310])
-    t_kpi.setStyle(TableStyle([
+    t_p1_kp = Table(p1_kpi_data, colWidths=[170, 55, 65, 250])
+    t_p1_kp.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#2B6CB0')),
-        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 4),
-        ('TOPPADDING', (0,0), (-1,-1), 4),
-        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#F7FAFC')]),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E0'))
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('TOPPADDING', (0,0), (-1,-1), 3),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E0')),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#F7FAFC')])
     ]))
-    elements.append(t_kpi)
+    story.append(t_p1_kp)
+    story.append(Spacer(1, 10))
 
-    doc.build(elements)
+    # Section 4: Project 2 Details
+    story.append(Paragraph("4. Project 2: Decentralized Campus Microgrid Energy Distribution Engine", h1_style))
+    p2_meta_data = [
+        [Paragraph("Form Field", th_style), Paragraph("Value to Copy & Paste", th_style)],
+        [Paragraph("Department", body_style), Paragraph("Computer Science and Engineering", body_style)],
+        [Paragraph("Theme", body_style), Paragraph("Sustainable Campus & Smart Energy", body_style)],
+        [Paragraph("Project Title", body_style), Paragraph("Decentralized Campus Microgrid Energy Distribution & Load Forecasting Engine", body_style)],
+        [Paragraph("Artefact Title", body_style), Paragraph("Smart Microgrid Energy Balancer & Predictive Dispatcher", body_style)],
+        [Paragraph("Academic Year / Sem", body_style), Paragraph("2026-27 / Sem-5", body_style)],
+        [Paragraph("Faculty Mentor", body_style), Paragraph("Amit Kachavimath", body_style)],
+        [Paragraph("Student 1 (Lead)", body_style), Paragraph("Nikhil Rao | SRN: 01FE23BCS971 | Div: B | Sem: Sem-5", body_style)],
+        [Paragraph("Student 2", body_style), Paragraph("Deepa Shrestha | SRN: 01FE23BCS972 | Div: B | Sem: Sem-5", body_style)],
+        [Paragraph("Student 3", body_style), Paragraph("Karthik Bhat | SRN: 01FE23BCS973 | Div: B | Sem: Sem-5", body_style)],
+        [Paragraph("Student 4", body_style), Paragraph("Meera Kulkarni | SRN: 01FE23BCS974 | Div: B | Sem: Sem-5", body_style)]
+    ]
+    t_p2 = Table(p2_meta_data, colWidths=[130, 410])
+    t_p2.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#2C5282')),
+        ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
+        ('TOPPADDING', (0,0), (-1,-1), 2.5),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 2.5),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E0')),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#F7FAFC')])
+    ]))
+    story.append(t_p2)
+    story.append(Spacer(1, 6))
+
+    # Project 2 Challenges Table
+    story.append(Paragraph("<b>Project 2 Challenges to Log:</b>", h2_style))
+    p2_ch_data = [
+        [Paragraph("Challenge Title", th_style), Paragraph("Root Cause & Impact", th_style), Paragraph("Action Plan & Owner", th_style)],
+        [Paragraph("Solar Inverter Telemetry Desynchronization", body_style), Paragraph("RS485 polling cycle lags during rapid solar insolation drops, causing substation power factor dips.", body_style), Paragraph("Migrate from 1000ms serial to 50ms event-driven Modbus-TCP socket.<br/><b>Owner:</b> Nikhil Rao", body_style)],
+        [Paragraph("Peak-Hour Load Forecasting Error > 10%", body_style), Paragraph("ARIMA model fails to capture chiller compressor start-stop cycles, discharging batteries sub-optimally.", body_style), Paragraph("Train Temporal Fusion Transformer model incorporating timetable features.<br/><b>Owner:</b> Deepa Shrestha", body_style)],
+        [Paragraph("MQTT Telemetry Dropping Under Wi-Fi Traffic", body_style), Paragraph("Substation smart meters share 2.4GHz Wi-Fi with campus mobile traffic during peak lunch breaks.", body_style), Paragraph("Enable MQTT QoS Level 1 with persistent local buffer queue.<br/><b>Owner:</b> Karthik Bhat", body_style)]
+    ]
+    t_p2_ch = Table(p2_ch_data, colWidths=[140, 210, 190])
+    t_p2_ch.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#742A2A')),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('TOPPADDING', (0,0), (-1,-1), 3),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E0')),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#F7FAFC')])
+    ]))
+    story.append(t_p2_ch)
+    story.append(Spacer(1, 6))
+
+    # Project 2 KPIs Table
+    story.append(Paragraph("<b>Project 2 KPIs to Enter:</b>", h2_style))
+    p2_kpi_data = [
+        [Paragraph("KPI Name", th_style), Paragraph("Target", th_style), Paragraph("Measured", th_style), Paragraph("Evidence Note", th_style)],
+        [Paragraph("Microgrid Short-Term Load Forecast MAPE", body_style), Paragraph("4.5 %", body_style), Paragraph("3.8 %", body_style), Paragraph("Scikit-learn evaluation report comparing predicted vs actual readings.", body_style)],
+        [Paragraph("Automated Phase Balancing Response Time", body_style), Paragraph("250 ms", body_style), Paragraph("185 ms", body_style), Paragraph("Inverter timestamped telemetry log recording transient load step responses.", body_style)],
+        [Paragraph("Solar Inverter Ingestion Reliability", body_style), Paragraph("99.8 %", body_style), Paragraph("99.92 %", body_style), Paragraph("PostgreSQL time-series database continuous ingestion audit query for 7 days.", body_style)],
+        [Paragraph("Peak Load Demand Reduction", body_style), Paragraph("18.0 %", body_style), Paragraph("19.4 %", body_style), Paragraph("Substation billing report comparing peak demand charges before/after dispatch.", body_style)]
+    ]
+    t_p2_kp = Table(p2_kpi_data, colWidths=[170, 55, 65, 250])
+    t_p2_kp.setStyle(TableStyle([
+        ('BACKGROUND', (0,0), (-1,0), colors.HexColor('#2B6CB0')),
+        ('VALIGN', (0,0), (-1,-1), 'TOP'),
+        ('TOPPADDING', (0,0), (-1,-1), 3),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 3),
+        ('GRID', (0,0), (-1,-1), 0.5, colors.HexColor('#CBD5E0')),
+        ('ROWBACKGROUNDS', (0,1), (-1,-1), [colors.white, colors.HexColor('#F7FAFC')])
+    ]))
+    story.append(t_p2_kp)
+    story.append(Spacer(1, 8))
+
+    # Section 5: Verification Checklist
+    story.append(Paragraph("5. Post-Creation Verification Checklist", h1_style))
+    chk_pdf = [
+        "<b>Jira Cloud Board:</b> Click [🔷 Jira Board ↗] in the project header to confirm the dedicated software board opens.",
+        "<b>Workspace Kanban Tasks:</b> Verify 3 tasks appear with active transition buttons (← To Do, In Progress →, Completed ✓) and Jira issue links.",
+        "<b>KPI Hyperlinks:</b> Open the KPIs tab to verify that starter and newly added KPIs display clickable 🔷 KEY-N ↗ badges.",
+        "<b>Challenge Hyperlinks:</b> Log any sample challenge and confirm an associated Jira issue is created with a live link."
+    ]
+    for ck in chk_pdf:
+        story.append(Paragraph(f"[✓] {ck}", body_style))
+        story.append(Spacer(1, 2))
+
+    doc.build(story)
     print(f"Successfully generated PDF document: {PDF_PATH}")
+    try:
+        import shutil
+        shutil.copyfile(PDF_PATH, OLD_PDF_PATH)
+        print(f"Also updated: {OLD_PDF_PATH}")
+    except Exception as e:
+        print(f"Notice: Could not overwrite {OLD_PDF_PATH}: {e}")
 
 if __name__ == '__main__':
     generate_docx()
