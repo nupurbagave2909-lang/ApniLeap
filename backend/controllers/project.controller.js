@@ -82,9 +82,31 @@ async function getProject(req, res, next) {
             }
         }
 
+        const { rows: chBoardLinks } = await pool.query(
+            `SELECT * FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_BOARD_CHALLENGES' LIMIT 1`,
+            [req.params.projectId]
+        );
+        const { rows: kpBoardLinks } = await pool.query(
+            `SELECT * FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_BOARD_KPIS' LIMIT 1`,
+            [req.params.projectId]
+        );
+
+        let challengesJiraUrl = null;
+        if (chBoardLinks[0]) {
+            const bId = chBoardLinks[0].jira_issue_id && !isNaN(Number(chBoardLinks[0].jira_issue_id)) ? `/${chBoardLinks[0].jira_issue_id}` : '';
+            challengesJiraUrl = `${baseUrl}/jira/software/projects/${chBoardLinks[0].jira_issue_key}/boards${bId}`;
+        }
+        let kpisJiraUrl = null;
+        if (kpBoardLinks[0]) {
+            const bId = kpBoardLinks[0].jira_issue_id && !isNaN(Number(kpBoardLinks[0].jira_issue_id)) ? `/${kpBoardLinks[0].jira_issue_id}` : '';
+            kpisJiraUrl = `${baseUrl}/jira/software/projects/${kpBoardLinks[0].jira_issue_key}/boards${bId}`;
+        }
+
         res.json({
             project: rows[0],
             jiraLink: jiraRows[0] ? { key: jiraRows[0].jira_issue_key, url: jiraUrl, link_type: jiraRows[0].link_type } : null,
+            challengesJiraLink: chBoardLinks[0] ? { key: chBoardLinks[0].jira_issue_key, url: challengesJiraUrl, link_type: 'JIRA_BOARD_CHALLENGES' } : null,
+            kpisJiraLink: kpBoardLinks[0] ? { key: kpBoardLinks[0].jira_issue_key, url: kpisJiraUrl, link_type: 'JIRA_BOARD_KPIS' } : null,
             confluenceLink: confluenceRows[0] ? { pageId: confluenceRows[0].confluence_page_id, url: confluenceRows[0].page_url } : null,
         });
     } catch (err) {

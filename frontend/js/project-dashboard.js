@@ -888,9 +888,11 @@ function wireSimpleModal({ modal, formId, errorId, submitId, fields, endpoint, o
 // ---------- Init ----------
 
 async function reloadProject() {
-  const { project, jiraLink, confluenceLink } = await Api.get(`/projects/${projectId}`);
+  const { project, jiraLink, challengesJiraLink, kpisJiraLink, confluenceLink } = await Api.get(`/projects/${projectId}`);
   currentProject = project;
   currentJiraLink = jiraLink;
+  currentChallengesJiraLink = challengesJiraLink;
+  currentKpisJiraLink = kpisJiraLink;
   currentConfluenceLink = confluenceLink;
   renderHeader();
   renderDefinitionView();
@@ -899,6 +901,8 @@ async function reloadProject() {
 }
 
 let currentJiraLink = null;
+let currentChallengesJiraLink = null;
+let currentKpisJiraLink = null;
 let currentConfluenceLink = null;
 
 function renderIntegrationStatus() {
@@ -916,15 +920,45 @@ function renderIntegrationStatus() {
     }
   }
 
+  const btnJiraChallengesBoard = document.getElementById('btnJiraChallengesBoard');
+  if (btnJiraChallengesBoard) {
+    const chUrl = currentChallengesJiraLink?.url || currentJiraLink?.url;
+    if (chUrl) {
+      btnJiraChallengesBoard.href = chUrl;
+      btnJiraChallengesBoard.classList.remove('d-none');
+    } else {
+      btnJiraChallengesBoard.classList.add('d-none');
+    }
+  }
+
+  const btnJiraKpisBoard = document.getElementById('btnJiraKpisBoard');
+  if (btnJiraKpisBoard) {
+    const kpUrl = currentKpisJiraLink?.url || currentJiraLink?.url;
+    if (kpUrl) {
+      btnJiraKpisBoard.href = kpUrl;
+      btnJiraKpisBoard.classList.remove('d-none');
+    } else {
+      btnJiraKpisBoard.classList.add('d-none');
+    }
+  }
+
   const parts = [];
   const isBoard = currentJiraLink?.link_type === 'JIRA_PROJECT' || currentJiraLink?.url?.includes('/boards');
   const jiraLabel = isBoard
-    ? `Jira Kanban Board: <a href="${esc(currentJiraLink.url)}" target="_blank" rel="noopener noreferrer" class="fw-bold">Open Board (${esc(currentJiraLink.key)}) ↗</a>`
+    ? `Jira Tasks Board: <a href="${esc(currentJiraLink.url)}" target="_blank" rel="noopener noreferrer" class="fw-bold">Open Tasks Board (${esc(currentJiraLink.key)}) ↗</a>`
     : `Jira: <a href="${esc(currentJiraLink.url)}" target="_blank" rel="noopener noreferrer">${esc(currentJiraLink.key)}</a>`;
 
   parts.push(currentJiraLink
     ? `<div class="mb-1">${jiraLabel}</div>`
     : `<div class="mb-1">Jira: <span class="text-muted">Not linked</span>${mentorUp ? ' <button class="btn btn-link btn-sm p-0" id="btnCreateJira">Create Board</button>' : ''}</div>`);
+
+  if (currentChallengesJiraLink?.url) {
+    parts.push(`<div class="mb-1">Jira Challenges Board: <a href="${esc(currentChallengesJiraLink.url)}" target="_blank" rel="noopener noreferrer" class="fw-bold">Open Challenges Board ↗</a></div>`);
+  }
+  if (currentKpisJiraLink?.url) {
+    parts.push(`<div class="mb-1">Jira KPIs Board: <a href="${esc(currentKpisJiraLink.url)}" target="_blank" rel="noopener noreferrer" class="fw-bold">Open KPIs Board ↗</a></div>`);
+  }
+
   parts.push(currentConfluenceLink
     ? `<div>Confluence: <a href="${esc(currentConfluenceLink.url)}" target="_blank" rel="noopener noreferrer">View Page</a></div>`
     : `<div>Confluence: <span class="text-muted">Not linked</span>${mentorUp ? ' <button class="btn btn-link btn-sm p-0" id="btnCreateConfluence">Create Page</button>' : ''}</div>`);
@@ -937,8 +971,14 @@ function renderIntegrationStatus() {
       ? `Confluence page: <a href="${esc(currentConfluenceLink.url)}" target="_blank" rel="noopener noreferrer">Open project documentation</a>`
       : 'Confluence page: not created yet (use the Overview tab to create one).');
     docParts.push(currentJiraLink
-      ? `Jira Kanban: <a href="${esc(currentJiraLink.url)}" target="_blank" rel="noopener noreferrer">${esc(currentJiraLink.key)} Board ↗</a>`
+      ? `Jira Tasks Board: <a href="${esc(currentJiraLink.url)}" target="_blank" rel="noopener noreferrer">${esc(currentJiraLink.key)} Board ↗</a>`
       : 'Jira issue: not created yet.');
+    if (currentChallengesJiraLink?.url) {
+      docParts.push(`Jira Challenges Board: <a href="${esc(currentChallengesJiraLink.url)}" target="_blank" rel="noopener noreferrer">Open Challenges Board ↗</a>`);
+    }
+    if (currentKpisJiraLink?.url) {
+      docParts.push(`Jira KPIs Board: <a href="${esc(currentKpisKiraLink || currentKpisJiraLink.url)}" target="_blank" rel="noopener noreferrer">Open KPIs Board ↗</a>`);
+    }
     docEl.innerHTML = docParts.join('<br>');
   }
 

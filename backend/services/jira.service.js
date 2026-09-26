@@ -134,55 +134,28 @@ async function ensureJiraProject(project, poolClient = null) {
             }
         }
 
-        // 3. Ensure Kanban board exists with proper project location
+        // 3. Ensure 3 dedicated boards exist: Tasks, Challenges, KPIs
+        let tasksBoard = { id: null, url: `${baseUrl()}/jira/software/projects/${key}/boards` };
+        let challengesBoard = { id: null, url: `${baseUrl()}/jira/software/projects/${key}/boards` };
+        let kpisBoard = { id: null, url: `${baseUrl()}/jira/software/projects/${key}/boards` };
+
         try {
-            const bRes = await jiraFetch(`/rest/agile/1.0/board?projectKeyOrId=${key}`);
-            const validBoard = bRes?.values?.find((b) => b.location?.projectKey === key);
-            if (validBoard) {
-                boardId = String(validBoard.id);
-            } else {
-                let filterId = null;
-                if (bRes?.values && bRes.values.length > 0) {
-                    try {
-                        const cfg = await jiraFetch(`/rest/agile/1.0/board/${bRes.values[0].id}/configuration`);
-                        filterId = cfg?.filter?.id;
-                        await jiraFetch(`/rest/agile/1.0/board/${bRes.values[0].id}`, { method: 'DELETE' });
-                    } catch (e) {}
-                }
-                if (!filterId) {
-                    const filter = await jiraFetch('/rest/api/3/filter', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            name: `Filter for ${key} board`,
-                            jql: `project = "${key}" ORDER BY Rank ASC`,
-                        }),
-                    });
-                    filterId = filter?.id;
-                    if (filterId) {
-                        try {
-                            await jiraFetch(`/rest/api/3/filter/${filterId}/permission`, {
-                                method: 'POST',
-                                body: JSON.stringify({ type: 'authenticated' })
-                            });
-                        } catch (e) {}
-                    }
-                }
-                if (filterId) {
-                    const newBoard = await jiraFetch('/rest/agile/1.0/board', {
-                        method: 'POST',
-                        body: JSON.stringify({
-                            name: `${key} board`,
-                            type: 'kanban',
-                            filterId: Number(filterId),
-                            location: {
-                                type: 'project',
-                                projectKeyOrId: key,
-                            },
-                        }),
-                    });
-                    if (newBoard?.id) boardId = String(newBoard.id);
-                }
-            }
+            tasksBoard = await ensureDedicatedBoard(
+                key,
+                'Tasks Board',
+                `project = "${key}" AND summary !~ "Challenge" AND summary !~ "KPI" ORDER BY Rank ASC`
+            );
+            challengesBoard = await ensureDedicatedBoard(
+                key,
+                'Challenges Board',
+                `project = "${key}" AND summary ~ "Challenge" ORDER BY Rank ASC`
+            );
+            kpisBoard = await ensureDedicatedBoard(
+                key,
+                'KPIs Board',
+                `project = "${key}" AND summary ~ "KPI" ORDER BY Rank ASC`
+            );
+            boardId = tasksBoard.id;
 
             // Ensure Nupur and admins have Administrators role in this project
             try {
@@ -196,13 +169,11 @@ async function ensureJiraProject(project, poolClient = null) {
                 }
             } catch (roleErr) {}
         } catch (boardErr) {
-            console.warn(`Could not verify/create board for ${key}:`, boardErr.message);
+            console.warn(`Could not verify/create boards for ${key}:`, boardErr.message);
         }
 
-        // 4. Insert or update jira_links
-        const boardUrl = boardId
-            ? `${baseUrl()}/jira/software/projects/${key}/boards/${boardId}`
-            : `${baseUrl()}/jira/software/projects/${key}/boards`;
+        // 4. Insert or update jira_links for all 3 boards
+        const boardUrl = tasksBoard.url;
 
         if (!links.length) {
             await db.query(
@@ -218,10 +189,51 @@ async function ensureJiraProject(project, poolClient = null) {
             );
         }
 
+        if (challengesBoard.id) {
+            const { rows: chRows } = await db.query(
+                `SELECT id FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_BOARD_CHALLENGES' LIMIT 1`,
+                [project.id]
+            );
+            if (!chRows.length) {
+                await db.query(
+                    `INSERT INTO jira_links (project_id, jira_issue_key, jira_issue_id, link_type)
+                     VALUES ($1, $2, $3, 'JIRA_BOARD_CHALLENGES')`,
+                    [project.id, key, challengesBoard.id]
+                );
+            } else {
+                await db.query(
+                    `UPDATE jira_links SET jira_issue_id = $1 WHERE id = $2`,
+                    [challengesBoard.id, chRows[0].id]
+                );
+            }
+        }
+
+        if (kpisBoard.id) {
+            const { rows: kpRows } = await db.query(
+                `SELECT id FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_BOARD_KPIS' LIMIT 1`,
+                [project.id]
+            );
+            if (!kpRows.length) {
+                await db.query(
+                    `INSERT INTO jira_links (project_id, jira_issue_key, jira_issue_id, link_type)
+                     VALUES ($1, $2, $3, 'JIRA_BOARD_KPIS')`,
+                    [project.id, key, kpisBoard.id]
+                );
+            } else {
+                await db.query(
+                    `UPDATE jira_links SET jira_issue_id = $1 WHERE id = $2`,
+                    [kpisBoard.id, kpRows[0].id]
+                );
+            }
+        }
+
         return {
             key,
             boardId,
             url: boardUrl,
+            tasksBoard,
+            challengesBoard,
+            kpisBoard,
             link_type: 'JIRA_PROJECT',
         };
     } catch (err) {
@@ -232,6 +244,77 @@ async function ensureJiraProject(project, poolClient = null) {
             link_type: 'JIRA_PROJECT',
         };
     }
+}
+
+async function ensureDedicatedBoard(key, boardSuffix, jql) {
+    const fullBoardName = `${key} ${boardSuffix}`;
+    try {
+        const bRes = await jiraFetch(`/rest/agile/1.0/board?projectKeyOrId=${key}`);
+        let existing = bRes?.values?.find((b) => b.name === fullBoardName || (boardSuffix === 'Tasks Board' && b.name === `${key} board`));
+        if (existing) {
+            try {
+                const cfg = await jiraFetch(`/rest/agile/1.0/board/${existing.id}/configuration`);
+                if (cfg?.filter?.id) {
+                    await jiraFetch(`/rest/api/3/filter/${cfg.filter.id}`, {
+                        method: 'PUT',
+                        body: JSON.stringify({
+                            name: `Filter for ${fullBoardName}`,
+                            jql
+                        })
+                    });
+                }
+            } catch (e) {}
+            return {
+                id: String(existing.id),
+                name: existing.name,
+                url: `${baseUrl()}/jira/software/projects/${key}/boards/${existing.id}`
+            };
+        }
+
+        const filter = await jiraFetch('/rest/api/3/filter', {
+            method: 'POST',
+            body: JSON.stringify({
+                name: `Filter for ${fullBoardName}`,
+                jql
+            })
+        });
+        const filterId = filter?.id;
+        if (filterId) {
+            try {
+                await jiraFetch(`/rest/api/3/filter/${filterId}/permission`, {
+                    method: 'POST',
+                    body: JSON.stringify({ type: 'authenticated' })
+                });
+            } catch (e) {}
+
+            const newBoard = await jiraFetch('/rest/agile/1.0/board', {
+                method: 'POST',
+                body: JSON.stringify({
+                    name: fullBoardName,
+                    type: 'kanban',
+                    filterId: Number(filterId),
+                    location: {
+                        type: 'project',
+                        projectKeyOrId: key
+                    }
+                })
+            });
+            if (newBoard?.id) {
+                return {
+                    id: String(newBoard.id),
+                    name: fullBoardName,
+                    url: `${baseUrl()}/jira/software/projects/${key}/boards/${newBoard.id}`
+                };
+            }
+        }
+    } catch (e) {
+        console.warn(`Could not ensure board ${fullBoardName}:`, e.message);
+    }
+    return {
+        id: null,
+        name: fullBoardName,
+        url: `${baseUrl()}/jira/software/projects/${key}/boards`
+    };
 }
 
 // Dynamically resolves target Jira project key

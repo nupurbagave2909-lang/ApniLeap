@@ -63,9 +63,6 @@
       <button class="btn btn-outline-secondary btn-sm" id="btnNavChallenges">Challenges</button>
       <button class="btn btn-outline-secondary btn-sm" id="btnNavKpis">KPIs</button>
       <a class="btn btn-outline-primary btn-sm d-none" id="btnHeaderJiraBoard" href="#" target="_blank" rel="noopener noreferrer">🔷 Jira Kanban Board ↗</a>
-      <button class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1 btn-refresh-trigger" id="btnRefreshDashboard" title="Refresh all project details, challenges, and KPIs">
-        <span class="refresh-spinner-icon">🔄</span> Refresh
-      </button>
     </div>
   </div>
 
@@ -179,7 +176,10 @@
     <div class="al-card">
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h2 class="mb-0">KPIs</h2>
-        <button class="btn btn-al-primary btn-sm" id="btnAddKpi">Add KPI</button>
+        <div class="d-flex gap-2">
+          <a class="btn btn-outline-success btn-sm d-none" id="btnJiraKpisBoard" href="#" target="_blank" rel="noopener noreferrer">🔷 Jira KPIs Board ↗</a>
+          <button class="btn btn-al-primary btn-sm" id="btnAddKpi">Add KPI</button>
+        </div>
       </div>
       <div class="table-responsive">
         <table class="table al-table">
@@ -196,6 +196,7 @@
       <div class="d-flex justify-content-between align-items-center mb-2">
         <h2 class="mb-0">Challenges &amp; Actions</h2>
         <div class="d-flex gap-2">
+          <a class="btn btn-outline-danger btn-sm d-none" id="btnJiraChallengesBoard" href="#" target="_blank" rel="noopener noreferrer">🔷 Jira Challenges Board ↗</a>
           <button class="btn btn-al-primary btn-sm d-none" id="btnAddChallengeBtn">+ Add Challenge</button>
           <button class="btn btn-al-primary btn-sm d-none" id="btnAddActionBtn">+ Add Action</button>
         </div>

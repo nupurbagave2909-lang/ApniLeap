@@ -11,6 +11,7 @@ const { listReviews, createReview } = require('../controllers/review.controller'
 const { listStudents, replaceStudents } = require('../controllers/student.controller');
 const {
     listWorkspaceTasks, createWorkspaceTask, updateWorkspaceTask, deleteWorkspaceTask,
+    updateWorkspaceChallenge, updateWorkspaceKpi,
 } = require('../controllers/workspace.controller');
 const { authenticate } = require('../middleware/auth.middleware');
 const { requireProjectScope } = require('../middleware/tenant.middleware');
@@ -85,6 +86,8 @@ router.get('/:projectId/workspace-tasks', listWorkspaceTasks);
 router.post('/:projectId/workspace-tasks', blockReadOnly, createWorkspaceTask);
 router.put('/:projectId/workspace-tasks/:taskId', blockReadOnly, updateWorkspaceTask);
 router.delete('/:projectId/workspace-tasks/:taskId', blockReadOnly, deleteWorkspaceTask);
+router.put('/:projectId/workspace-challenges/:id', blockReadOnly, updateWorkspaceChallenge);
+router.put('/:projectId/workspace-kpis/:id', blockReadOnly, updateWorkspaceKpi);
 
 router.post('/:projectId/jira', requireRole(...MENTOR_UP), createJiraLink);
 router.post('/:projectId/confluence', requireRole(...MENTOR_UP), createConfluenceLink);

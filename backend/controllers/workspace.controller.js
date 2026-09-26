@@ -60,7 +60,22 @@ async function listWorkspaceTasks(req, res, next) {
                     const desc = jiraService.fromAdf(ji.fields?.description) || '';
                     const assignee = ji.fields?.assignee?.displayName || null;
 
-                    // 1. Sync to workspace_tasks
+                    // 1. If this issue is a Challenge, sync its status in the issues table only
+                    if (summary.startsWith('[Challenge]')) {
+                        const challengeStatus = mappedStatus === 'COMPLETED' ? 'RESOLVED' : mappedStatus === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'OPEN';
+                        await pool.query(
+                            `UPDATE issues SET status = $1, updated_at = now() WHERE jira_issue_key = $2 AND status != $1`,
+                            [challengeStatus, ji.key]
+                        );
+                        continue; // DO NOT put in workspace_tasks
+                    }
+
+                    // 2. If this issue is a KPI, do not put in workspace_tasks
+                    if (summary.startsWith('[KPI]')) {
+                        continue; // DO NOT put in workspace_tasks
+                    }
+
+                    // 3. Regular Tasks only go into workspace_tasks
                     const { rows: matchedTasks } = await pool.query(
                         `SELECT id, status, title FROM workspace_tasks WHERE jira_issue_key = $1 OR (project_id = $2 AND title = $3)`,
                         [ji.key, projectId, summary]
@@ -81,28 +96,21 @@ async function listWorkspaceTasks(req, res, next) {
                             [projectId, summary, desc, mappedStatus, mappedPriority, assignee, ji.key]
                         );
                     }
-
-                    // 2. If this issue is a synced Challenge, sync its status in the issues table too
-                    if (summary.startsWith('[Challenge]')) {
-                        const challengeStatus = mappedStatus === 'COMPLETED' ? 'RESOLVED' : mappedStatus === 'IN_PROGRESS' ? 'IN_PROGRESS' : 'OPEN';
-                        await pool.query(
-                            `UPDATE issues SET status = $1, updated_at = now() WHERE jira_issue_key = $2 AND status != $1`,
-                            [challengeStatus, ji.key]
-                        );
-                    }
-
-                    // 3. If this issue is a synced KPI, sync status
-                    if (summary.startsWith('[KPI]')) {
-                        // Reflect active KPI tracking status
-                    }
                 }
             } catch (syncErr) {
                 console.error(`Live Jira sync error for ${projectKey} (non-fatal):`, syncErr.message);
             }
         }
 
+        // Clean up any historical [Challenge] or [KPI] entries mistakenly added to workspace_tasks
+        await pool.query(
+            `DELETE FROM workspace_tasks WHERE project_id = $1 AND (title ILIKE '[Challenge]%' OR title ILIKE '[KPI]%')`,
+            [projectId]
+        );
+
+        // Fetch regular tasks
         let { rows: tasks } = await pool.query(
-            `SELECT * FROM workspace_tasks WHERE project_id = $1 ORDER BY created_at ASC`,
+            `SELECT * FROM workspace_tasks WHERE project_id = $1 AND title NOT ILIKE '[Challenge]%' AND title NOT ILIKE '[KPI]%' ORDER BY created_at ASC`,
             [projectId]
         );
 
@@ -154,18 +162,107 @@ async function listWorkspaceTasks(req, res, next) {
             }
         }
 
-        // Build proper Jira board URL if not already set
-        if (!boardUrl && projectKey && jiraService.isConfigured()) {
-            boardUrl = `${jiraService.baseUrl()}/jira/software/projects/${projectKey}/boards`;
-        }
+        // Fetch challenges for dedicated Challenges Board
+        const { rows: challengeRows } = await pool.query(
+            `SELECT i.*, u.full_name AS raised_by_name FROM issues i
+             LEFT JOIN users u ON u.id = i.raised_by
+             WHERE i.project_id = $1 ORDER BY i.created_at ASC`,
+            [projectId]
+        );
+        const challenges = challengeRows.map(c => {
+            let kanbanStatus = 'TODO';
+            if (c.status === 'IN_PROGRESS') kanbanStatus = 'IN_PROGRESS';
+            else if (c.status === 'RESOLVED' || c.status === 'CLOSED') kanbanStatus = 'COMPLETED';
+            return {
+                id: c.id,
+                title: c.title,
+                description: [c.root_cause ? `Root Cause: ${c.root_cause}` : '', c.impact ? `Impact: ${c.impact}` : ''].filter(Boolean).join(' | ') || 'Challenge logged.',
+                rawStatus: c.status,
+                status: kanbanStatus,
+                priority: 'HIGH',
+                assignee_name: c.raised_by_name || 'Student',
+                jira_issue_key: c.jira_issue_key,
+                support_required: c.support_required,
+                root_cause: c.root_cause,
+                impact: c.impact,
+                itemType: 'CHALLENGE'
+            };
+        });
+
+        // Fetch KPIs for dedicated KPIs Board
+        const { rows: kpiRows } = await pool.query(
+            `SELECT k.*, u.full_name AS owner_name,
+                    (SELECT row_to_json(m) FROM (
+                        SELECT measured_value, evidence, measured_at,
+                               (SELECT full_name FROM users WHERE id = km.recorded_by) AS recorded_by_name
+                        FROM kpi_measurements km WHERE km.kpi_id = k.id
+                        ORDER BY km.measured_at DESC LIMIT 1
+                    ) m) AS latest_measurement
+             FROM kpis k
+             LEFT JOIN users u ON u.id = k.owner_user_id
+             WHERE k.project_id = $1 ORDER BY k.created_at ASC`,
+            [projectId]
+        );
+        const kpis = kpiRows.map(k => {
+            let kanbanStatus = 'TODO';
+            if (k.latest_measurement) {
+                const targetNum = parseFloat(k.target_value);
+                const measuredNum = parseFloat(k.latest_measurement.measured_value);
+                if (!isNaN(targetNum) && !isNaN(measuredNum) && measuredNum >= targetNum) {
+                    kanbanStatus = 'COMPLETED';
+                } else {
+                    kanbanStatus = 'IN_PROGRESS';
+                }
+            }
+            return {
+                id: k.id,
+                title: k.name,
+                description: `Target: ${k.target_value || '-'} ${k.unit || ''}${k.latest_measurement ? ` | Measured: ${k.latest_measurement.measured_value} ${k.unit || ''}` : ' (Target Defined)'}`,
+                status: kanbanStatus,
+                priority: 'MEDIUM',
+                assignee_name: k.owner_name || 'Faculty Mentor',
+                jira_issue_key: k.jira_issue_key,
+                target_value: k.target_value,
+                unit: k.unit,
+                latest_measurement: k.latest_measurement,
+                itemType: 'KPI'
+            };
+        });
+
+        // Query dedicated board links from DB
+        const { rows: chBoardLinks } = await pool.query(
+            `SELECT * FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_BOARD_CHALLENGES' LIMIT 1`,
+            [projectId]
+        );
+        const { rows: kpBoardLinks } = await pool.query(
+            `SELECT * FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_BOARD_KPIS' LIMIT 1`,
+            [projectId]
+        );
+
+        const baseUrl = jiraService.baseUrl();
+        const tasksBoardUrl = jiraInfo?.tasksBoard?.url || (projectKey && boardUrl ? boardUrl : `${baseUrl}/jira/software/projects/${projectKey}/boards`);
+        const challengesBoardUrl = jiraInfo?.challengesBoard?.url || (chBoardLinks[0]?.jira_issue_id ? `${baseUrl}/jira/software/projects/${projectKey}/boards/${chBoardLinks[0].jira_issue_id}` : `${baseUrl}/jira/software/projects/${projectKey}/boards`);
+        const kpisBoardUrl = jiraInfo?.kpisBoard?.url || (kpBoardLinks[0]?.jira_issue_id ? `${baseUrl}/jira/software/projects/${projectKey}/boards/${kpBoardLinks[0].jira_issue_id}` : `${baseUrl}/jira/software/projects/${projectKey}/boards`);
 
         res.json({
             tasks,
-            jiraLink: projectKey ? {
+            challenges,
+            kpis,
+            jiraLink: {
                 key: projectKey,
-                url: boardUrl,
+                url: tasksBoardUrl,
                 link_type: 'JIRA_PROJECT',
-            } : (jiraRows[0] || null),
+            },
+            challengesJiraLink: {
+                key: projectKey,
+                url: challengesBoardUrl,
+                link_type: 'JIRA_BOARD_CHALLENGES',
+            },
+            kpisJiraLink: {
+                key: projectKey,
+                url: kpisBoardUrl,
+                link_type: 'JIRA_BOARD_KPIS',
+            },
             project: {
                 id: req.project.id,
                 projectCode: req.project.project_code,
@@ -343,9 +440,76 @@ async function deleteWorkspaceTask(req, res, next) {
     }
 }
 
+// PUT /api/projects/:projectId/workspace-challenges/:id
+async function updateWorkspaceChallenge(req, res, next) {
+    try {
+        const { id, projectId } = req.params;
+        const { status } = req.body || {};
+
+        let dbStatus = 'OPEN';
+        if (status === 'IN_PROGRESS') dbStatus = 'IN_PROGRESS';
+        else if (status === 'COMPLETED' || status === 'RESOLVED') dbStatus = 'RESOLVED';
+        else if (status === 'TODO' || status === 'OPEN') dbStatus = 'OPEN';
+
+        const { rows } = await pool.query(
+            `UPDATE issues SET status = $1, updated_at = now() WHERE id = $2 AND project_id = $3 RETURNING *`,
+            [dbStatus, id, projectId]
+        );
+        const issue = rows[0];
+        if (!issue) return res.status(404).json({ error: 'Challenge not found.' });
+
+        if (issue.jira_issue_key && jiraService.isConfigured()) {
+            try {
+                await jiraService.updateJiraIssueStatus(issue.jira_issue_key, status);
+            } catch (e) {
+                console.warn('Jira challenge status transition warning:', e.message);
+            }
+        }
+        res.json({ challenge: issue });
+    } catch (err) {
+        next(err);
+    }
+}
+
+// PUT /api/projects/:projectId/workspace-kpis/:id
+async function updateWorkspaceKpi(req, res, next) {
+    try {
+        const { id, projectId } = req.params;
+        const { status, measuredValue, evidence } = req.body || {};
+
+        const { rows: kRows } = await pool.query(
+            `SELECT * FROM kpis WHERE id = $1 AND project_id = $2`,
+            [id, projectId]
+        );
+        const kpi = kRows[0];
+        if (!kpi) return res.status(404).json({ error: 'KPI not found.' });
+
+        if (measuredValue !== undefined && measuredValue !== null && String(measuredValue).trim() !== '') {
+            await pool.query(
+                `INSERT INTO kpi_measurements (kpi_id, measured_value, evidence, recorded_by)
+                 VALUES ($1, $2, $3, $4)`,
+                [id, measuredValue, evidence || null, req.user.id]
+            );
+        }
+
+        if (kpi.jira_issue_key && jiraService.isConfigured()) {
+            try {
+                await jiraService.updateJiraIssueStatus(kpi.jira_issue_key, status);
+            } catch (e) {
+                console.warn('Jira KPI status transition warning:', e.message);
+            }
+        }
+        res.json({ success: true, kpi });
+    } catch (err) {
+        next(err);
+    }
+}
+
 module.exports = {
     listWorkspaceTasks,
     createWorkspaceTask,
     updateWorkspaceTask,
     deleteWorkspaceTask,
+    updateWorkspaceChallenge,
+    updateWorkspaceKpi,
 };
