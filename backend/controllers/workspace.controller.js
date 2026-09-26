@@ -184,6 +184,11 @@ async function listWorkspaceTasks(req, res, next) {
 function canManageWorkspaceTask(user, project) {
     if (!user || !project) return false;
     const roles = user.roles || [];
+    const isGov = roles.some((r) =>
+        ['PLATFORM_ADMIN', 'GLOBAL_PROGRAMME_LEADER', 'INSTITUTE_ADMIN', 'DEAN_PRINCIPAL', 'DEPARTMENT_HEAD', 'REVIEWER'].includes(r)
+    );
+    if (isGov) return true;
+
     const isGuide = roles.includes('FACULTY_MENTOR') && (
         (project.mentor_user_id && project.mentor_user_id === user.id) ||
         (user.fullName && project.mentor_name &&
@@ -193,8 +198,7 @@ function canManageWorkspaceTask(user, project) {
         (user.projectIds || []).includes(project.id)
     );
     const isStudent = roles.includes('STUDENT') && (user.projectIds || []).includes(project.id);
-    const isAdmin = roles.includes('PLATFORM_ADMIN') || roles.includes('DEPARTMENT_HEAD');
-    return isGuide || isStudent || isAdmin;
+    return isGuide || isStudent;
 }
 
 // POST /api/projects/:projectId/workspace-tasks

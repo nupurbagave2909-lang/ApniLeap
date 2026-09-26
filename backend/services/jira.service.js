@@ -314,31 +314,38 @@ async function updateJiraIssueStatus(issueKey, apnileapStatus) {
     if (!issueKey) return;
     try {
         const { transitions } = await jiraFetch(`/rest/api/3/issue/${issueKey}/transitions`);
+        if (!transitions || !transitions.length) return;
+
         let targetTransition = null;
 
         if (apnileapStatus === 'TODO') {
-            // Must specifically target the board's to-do status (avoiding Backlog and Selected for development)
-            targetTransition = transitions.find(t => t.to?.id === '10014' || t.to?.id === '10008' || /^to-do$/i.test(t.name) || /^to-do$/i.test(t.to?.name));
-            if (!targetTransition) {
-                targetTransition = transitions.find(t => /^to-do$/i.test(t.name) || /^to-do$/i.test(t.to?.name) || /^to do$/i.test(t.name) || /^todo$/i.test(t.name));
-            }
+            targetTransition =
+                transitions.find(t => /^to[ -]?do$/i.test(t.to?.name)) ||
+                transitions.find(t => t.to?.statusCategory?.key === 'new' && !/backlog/i.test(t.to?.name)) ||
+                transitions.find(t => /stop progress|reopen|to[ -]?do/i.test(t.name)) ||
+                transitions.find(t => t.to?.statusCategory?.key === 'new') ||
+                transitions[0];
         } else if (apnileapStatus === 'IN_PROGRESS') {
-            targetTransition = transitions.find(t => t.to?.id === '3' || t.to?.id === '10009' || /^in progress$/i.test(t.name) || /^in progress$/i.test(t.to?.name));
-            if (!targetTransition) {
-                targetTransition = transitions.find(t => /in progress|in-progress|doing/i.test(t.name) || t.to?.statusCategory?.key === 'indeterminate');
-            }
+            targetTransition =
+                transitions.find(t => /^in[ -]?progress$/i.test(t.to?.name)) ||
+                transitions.find(t => (t.to?.statusCategory?.key === 'indeterminate' || t.to?.statusCategory?.name?.toLowerCase() === 'in progress') && !/backlog/i.test(t.to?.name)) ||
+                transitions.find(t => /start progress|in[ -]?progress|reopen and start/i.test(t.name)) ||
+                transitions.find(t => t.to?.statusCategory?.key === 'indeterminate');
         } else if (apnileapStatus === 'COMPLETED' || apnileapStatus === 'DONE' || apnileapStatus === 'RESOLVED') {
-            targetTransition = transitions.find(t => t.to?.id === '10013' || t.to?.id === '10010' || /^done$/i.test(t.name) || /^done$/i.test(t.to?.name));
-            if (!targetTransition) {
-                targetTransition = transitions.find(t => /done|completed|resolved/i.test(t.name) || t.to?.statusCategory?.key === 'done');
-            }
+            targetTransition =
+                transitions.find(t => /^done$/i.test(t.to?.name) || /^completed$/i.test(t.to?.name) || /^resolved$/i.test(t.to?.name)) ||
+                transitions.find(t => t.to?.statusCategory?.key === 'done' || t.to?.statusCategory?.name?.toLowerCase() === 'done') ||
+                transitions.find(t => /done|resolve|complete|close/i.test(t.name));
         }
 
         if (targetTransition) {
+            console.log(`Transitioning ${issueKey} to ${apnileapStatus} via transition ${targetTransition.id} ("${targetTransition.name}" -> "${targetTransition.to?.name}")`);
             await jiraFetch(`/rest/api/3/issue/${issueKey}/transitions`, {
                 method: 'POST',
                 body: JSON.stringify({ transition: { id: targetTransition.id } }),
             });
+        } else {
+            console.warn(`No matching transition found for ${issueKey} to ${apnileapStatus}. Available:`, transitions.map(t => `${t.id}: ${t.name} -> ${t.to?.name}`));
         }
     } catch (err) {
         console.error(`Jira status transition failed for ${issueKey}:`, err.message);
