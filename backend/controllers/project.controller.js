@@ -71,9 +71,10 @@ async function getProject(req, res, next) {
             [req.params.projectId]
         );
 
+        const baseUrl = jiraService.baseUrl();
+
         let jiraUrl = null;
         if (jiraRows[0]) {
-            const baseUrl = (process.env.JIRA_BASE_URL || '').replace(/\/$/, '');
             if (jiraRows[0].link_type === 'JIRA_PROJECT') {
                 const bId = jiraRows[0].jira_issue_id && !isNaN(Number(jiraRows[0].jira_issue_id)) ? `/${jiraRows[0].jira_issue_id}` : '';
                 jiraUrl = `${baseUrl}/jira/software/projects/${jiraRows[0].jira_issue_key}/boards${bId}`;
