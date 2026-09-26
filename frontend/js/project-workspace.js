@@ -11,11 +11,10 @@ let loadedChallenges = [];
 let loadedKpis = [];
 let boardLinks = {
   tasks: null,
-  challenges: null,
-  kpis: null,
+  challengesKpis: null,
 };
 
-let currentBoardType = 'tasks'; // 'tasks' | 'challenges' | 'kpis'
+let currentBoardType = 'tasks'; // 'tasks' | 'challenges-kpis'
 let teamMembers = [];
 let canCreateTask = false;
 let canManageChallenges = true;
@@ -144,29 +143,22 @@ function renderHeader(jiraLink) {
 function updateJiraBoardLinks() {
   const activeBtn = document.getElementById('btnActiveBoardJira');
   const tasksLink = document.getElementById('linkJiraTasksBoard');
-  const challengesLink = document.getElementById('linkJiraChallengesBoard');
-  const kpisLink = document.getElementById('linkJiraKpisBoard');
+  const challengesKpisLink = document.getElementById('linkJiraChallengesKpisBoard');
 
   if (tasksLink && boardLinks.tasks?.url) {
     tasksLink.href = boardLinks.tasks.url;
   }
-  if (challengesLink && boardLinks.challenges?.url) {
-    challengesLink.href = boardLinks.challenges.url;
-  }
-  if (kpisLink && boardLinks.kpis?.url) {
-    kpisLink.href = boardLinks.kpis.url;
+  if (challengesKpisLink && boardLinks.challengesKpis?.url) {
+    challengesKpisLink.href = boardLinks.challengesKpis.url;
   }
 
   if (activeBtn) {
     if (currentBoardType === 'tasks') {
       activeBtn.href = boardLinks.tasks?.url || '#';
       activeBtn.innerHTML = '🔷 Open Tasks in Jira ↗';
-    } else if (currentBoardType === 'challenges') {
-      activeBtn.href = boardLinks.challenges?.url || '#';
-      activeBtn.innerHTML = '⚠️ Open Challenges in Jira ↗';
-    } else if (currentBoardType === 'kpis') {
-      activeBtn.href = boardLinks.kpis?.url || '#';
-      activeBtn.innerHTML = '🎯 Open KPIs in Jira ↗';
+    } else {
+      activeBtn.href = boardLinks.challengesKpis?.url || '#';
+      activeBtn.innerHTML = '⚠️🎯 Open Challenges &amp; KPIs in Jira ↗';
     }
     activeBtn.classList.toggle('d-none', !activeBtn.getAttribute('href') || activeBtn.getAttribute('href') === '#');
   }
@@ -174,25 +166,29 @@ function updateJiraBoardLinks() {
 
 function updateBoardUIState() {
   // Update Tab pills active state
-  ['tasks', 'challenges', 'kpis'].forEach(type => {
-    const tabEl = document.getElementById(`tab${type.charAt(0).toUpperCase() + type.slice(1)}`);
-    if (tabEl) {
-      tabEl.classList.toggle('active', currentBoardType === type);
-    }
-  });
+  const tabTasks = document.getElementById('tabTasks');
+  const tabChKp = document.getElementById('tabChallengesKpis');
+  if (tabTasks) tabTasks.classList.toggle('active', currentBoardType === 'tasks');
+  if (tabChKp) tabChKp.classList.toggle('active', currentBoardType === 'challenges-kpis');
 
-  // Update Main Create button
-  const btnCreate = document.getElementById('btnCreateTask');
-  if (btnCreate) {
-    if (currentBoardType === 'tasks') {
-      btnCreate.textContent = '+ Create Task';
-      btnCreate.classList.toggle('d-none', !canCreateTask);
-    } else if (currentBoardType === 'challenges') {
-      btnCreate.textContent = '+ Log Challenge';
-      btnCreate.classList.toggle('d-none', !canManageChallenges);
-    } else if (currentBoardType === 'kpis') {
-      btnCreate.textContent = '+ Add KPI';
-      btnCreate.classList.toggle('d-none', !canManageKpis);
+  // Update Header Create buttons
+  const btnCreateTask = document.getElementById('btnCreateTask');
+  const wrapChKp = document.getElementById('wrapChallengesKpisButtons');
+  const btnLogCh = document.getElementById('btnLogChallenge');
+  const btnAddKp = document.getElementById('btnAddKpi');
+
+  if (currentBoardType === 'tasks') {
+    if (btnCreateTask) {
+      btnCreateTask.classList.remove('d-none');
+      btnCreateTask.classList.toggle('d-none', !canCreateTask);
+    }
+    if (wrapChKp) wrapChKp.classList.add('d-none');
+  } else {
+    if (btnCreateTask) btnCreateTask.classList.add('d-none');
+    if (wrapChKp) {
+      wrapChKp.classList.remove('d-none');
+      if (btnLogCh) btnLogCh.classList.toggle('d-none', !canManageChallenges);
+      if (btnAddKp) btnAddKp.classList.toggle('d-none', !canManageKpis);
     }
   }
 
@@ -205,14 +201,10 @@ function updateBoardUIState() {
     if (colTodo) colTodo.textContent = 'To Do';
     if (colInProgress) colInProgress.textContent = 'In Progress';
     if (colCompleted) colCompleted.textContent = 'Completed';
-  } else if (currentBoardType === 'challenges') {
-    if (colTodo) colTodo.textContent = 'Open (To Do)';
-    if (colInProgress) colInProgress.textContent = 'In Progress (Resolving)';
-    if (colCompleted) colCompleted.textContent = 'Resolved (Completed)';
-  } else if (currentBoardType === 'kpis') {
-    if (colTodo) colTodo.textContent = 'Target Defined';
-    if (colInProgress) colInProgress.textContent = 'Tracking & In Progress';
-    if (colCompleted) colCompleted.textContent = 'Target Met';
+  } else {
+    if (colTodo) colTodo.textContent = 'Open / Defined';
+    if (colInProgress) colInProgress.textContent = 'In Progress / Tracking';
+    if (colCompleted) colCompleted.textContent = 'Resolved / Target Met';
   }
 
   updateJiraBoardLinks();
@@ -244,8 +236,7 @@ async function loadWorkspace() {
     loadedKpis = data.kpis || [];
 
     boardLinks.tasks = data.jiraLink;
-    boardLinks.challenges = data.challengesJiraLink;
-    boardLinks.kpis = data.kpisJiraLink;
+    boardLinks.challengesKpis = data.challengesAndKpisJiraLink || data.challengesJiraLink || data.kpisJiraLink;
 
     if (data.project) currentProject = Object.assign(currentProject || {}, data.project);
     if (data.jiraLink) renderHeader(data.jiraLink);
@@ -253,10 +244,8 @@ async function loadWorkspace() {
     // Update count badges
     const badgeTasks = document.getElementById('badgeTasksCount');
     if (badgeTasks) badgeTasks.textContent = loadedTasks.length;
-    const badgeCh = document.getElementById('badgeChallengesCount');
-    if (badgeCh) badgeCh.textContent = loadedChallenges.length;
-    const badgeKp = document.getElementById('badgeKpisCount');
-    if (badgeKp) badgeKp.textContent = loadedKpis.length;
+    const badgeChKp = document.getElementById('badgeChallengesKpisCount');
+    if (badgeChKp) badgeChKp.textContent = (loadedChallenges.length + loadedKpis.length);
 
     updateJiraBoardLinks();
     renderActiveBoard();
@@ -273,15 +262,13 @@ async function loadWorkspace() {
 function renderActiveBoard() {
   if (currentBoardType === 'tasks') {
     renderTasksBoard();
-  } else if (currentBoardType === 'challenges') {
-    renderChallengesBoard();
-  } else if (currentBoardType === 'kpis') {
-    renderKpisBoard();
+  } else {
+    renderChallengesAndKpisBoard();
   }
 }
 
 // -------------------------------------------------------------
-// 1. TASKS BOARD
+// 1. TASKS BOARD (Regular Tasks Only)
 // -------------------------------------------------------------
 function renderTasksBoard() {
   const todoTasks = loadedTasks.filter(t => t.status === 'TODO');
@@ -417,84 +404,44 @@ async function deleteTask(taskId) {
 }
 
 // -------------------------------------------------------------
-// 2. CHALLENGES BOARD
+// 2. COMBINED CHALLENGES & KPIS BOARD (One Board for Both)
 // -------------------------------------------------------------
-function renderChallengesBoard() {
-  const todoChallenges = loadedChallenges.filter(c => c.status === 'TODO');
-  const inProgressChallenges = loadedChallenges.filter(c => c.status === 'IN_PROGRESS');
-  const completedChallenges = loadedChallenges.filter(c => c.status === 'COMPLETED');
+function renderChallengesAndKpisBoard() {
+  const todoItems = [
+    ...loadedChallenges.filter(c => c.status === 'TODO'),
+    ...loadedKpis.filter(k => k.status === 'TODO')
+  ];
+  const inProgressItems = [
+    ...loadedChallenges.filter(c => c.status === 'IN_PROGRESS'),
+    ...loadedKpis.filter(k => k.status === 'IN_PROGRESS')
+  ];
+  const completedItems = [
+    ...loadedChallenges.filter(c => c.status === 'COMPLETED'),
+    ...loadedKpis.filter(k => k.status === 'COMPLETED')
+  ];
 
-  document.getElementById('countTodo').textContent = todoChallenges.length;
-  document.getElementById('countInProgress').textContent = inProgressChallenges.length;
-  document.getElementById('countCompleted').textContent = completedChallenges.length;
+  document.getElementById('countTodo').textContent = todoItems.length;
+  document.getElementById('countInProgress').textContent = inProgressItems.length;
+  document.getElementById('countCompleted').textContent = completedItems.length;
 
-  renderChallengeColumn('listTodo', todoChallenges, 'TODO');
-  renderChallengeColumn('listInProgress', inProgressChallenges, 'IN_PROGRESS');
-  renderChallengeColumn('listCompleted', completedChallenges, 'COMPLETED');
+  renderCombinedColumn('listTodo', todoItems, 'TODO');
+  renderCombinedColumn('listInProgress', inProgressItems, 'IN_PROGRESS');
+  renderCombinedColumn('listCompleted', completedItems, 'COMPLETED');
 }
 
-function renderChallengeColumn(containerId, challenges, columnStatus) {
+function renderCombinedColumn(containerId, items, columnStatus) {
   const container = document.getElementById(containerId);
-  if (!challenges.length) {
-    container.innerHTML = `<div class="text-muted text-center py-4" style="font-size:13.5px">No challenges in this column.</div>`;
+  if (!items.length) {
+    container.innerHTML = `<div class="text-muted text-center py-4" style="font-size:13.5px">No challenges or KPIs in this column.</div>`;
     return;
   }
 
-  container.innerHTML = challenges.map(c => {
-    let moveButtons = '';
-    if (canManageChallenges) {
-      if (columnStatus === 'TODO') {
-        moveButtons = `
-          <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:11.5px" data-move-ch="IN_PROGRESS" data-id="${esc(c.id)}">
-            In Progress →
-          </button>
-        `;
-      } else if (columnStatus === 'IN_PROGRESS') {
-        moveButtons = `
-          <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:11.5px" data-move-ch="TODO" data-id="${esc(c.id)}">
-            ← Open
-          </button>
-          <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11.5px" data-move-ch="COMPLETED" data-id="${esc(c.id)}">
-            Resolved ✓
-          </button>
-        `;
-      } else if (columnStatus === 'COMPLETED') {
-        moveButtons = `
-          <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:11.5px" data-move-ch="IN_PROGRESS" data-id="${esc(c.id)}">
-            ← In Progress
-          </button>
-        `;
-      }
+  container.innerHTML = items.map(item => {
+    if (item.itemType === 'CHALLENGE') {
+      return renderChallengeCard(item, columnStatus);
+    } else {
+      return renderKpiCard(item, columnStatus);
     }
-
-    const jiraUrl = c.jira_issue_key
-      ? `https://apnileap-portfolio.atlassian.net/browse/${encodeURIComponent(c.jira_issue_key)}`
-      : null;
-    const jiraTag = jiraUrl
-      ? `<a href="${jiraUrl}" target="_blank" rel="noopener noreferrer" class="jira-tag" style="text-decoration:none" title="Open Challenge in Jira">🔷 ${esc(c.jira_issue_key)} ↗</a>`
-      : `<span class="jira-tag">⚠️ Challenge</span>`;
-
-    return `
-      <div class="kanban-card" data-card-id="${esc(c.id)}" style="border-left: 4px solid #ae2a19;">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-          ${jiraTag}
-          <span class="priority-high">CHALLENGE</span>
-        </div>
-        <div class="fw-semibold mb-1" style="font-size:14px; color:#212529">${esc(c.title)}</div>
-        ${c.root_cause ? `<div class="text-muted mb-1" style="font-size:12px"><strong>Cause:</strong> ${esc(c.root_cause)}</div>` : ''}
-        ${c.impact ? `<div class="text-muted mb-1" style="font-size:12px"><strong>Impact:</strong> ${esc(c.impact)}</div>` : ''}
-        ${c.support_required ? `<div class="text-primary mb-2" style="font-size:12px"><strong>Support:</strong> ${esc(c.support_required)}</div>` : ''}
-        <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
-          <div class="assignee-chip">
-            <span style="font-size:13px">👤</span>
-            <span>${esc(c.assignee_name || 'Student')}</span>
-          </div>
-          <div class="d-flex gap-1 align-items-center">
-            ${moveButtons}
-          </div>
-        </div>
-      </div>
-    `;
   }).join('');
 
   // Wire challenge move buttons
@@ -504,102 +451,6 @@ function renderChallengeColumn(containerId, challenges, columnStatus) {
       await updateChallengeStatus(btn.dataset.id, btn.dataset.moveCh);
     });
   });
-}
-
-async function updateChallengeStatus(challengeId, newStatus) {
-  try {
-    await Api.put(`/projects/${projectId}/workspace-challenges/${challengeId}`, { status: newStatus });
-    await loadWorkspace();
-  } catch (err) {
-    alert(err.message);
-  }
-}
-
-// -------------------------------------------------------------
-// 3. KPIS BOARD
-// -------------------------------------------------------------
-function renderKpisBoard() {
-  const todoKpis = loadedKpis.filter(k => k.status === 'TODO');
-  const inProgressKpis = loadedKpis.filter(k => k.status === 'IN_PROGRESS');
-  const completedKpis = loadedKpis.filter(k => k.status === 'COMPLETED');
-
-  document.getElementById('countTodo').textContent = todoKpis.length;
-  document.getElementById('countInProgress').textContent = inProgressKpis.length;
-  document.getElementById('countCompleted').textContent = completedKpis.length;
-
-  renderKpiColumn('listTodo', todoKpis, 'TODO');
-  renderKpiColumn('listInProgress', inProgressKpis, 'IN_PROGRESS');
-  renderKpiColumn('listCompleted', completedKpis, 'COMPLETED');
-}
-
-function renderKpiColumn(containerId, kpis, columnStatus) {
-  const container = document.getElementById(containerId);
-  if (!kpis.length) {
-    container.innerHTML = `<div class="text-muted text-center py-4" style="font-size:13.5px">No KPIs in this column.</div>`;
-    return;
-  }
-
-  container.innerHTML = kpis.map(k => {
-    let moveButtons = '';
-    if (canCreateTask) {
-      if (columnStatus === 'TODO') {
-        moveButtons = `
-          <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:11.5px" data-move-kp="IN_PROGRESS" data-id="${esc(k.id)}">
-            In Progress →
-          </button>
-        `;
-      } else if (columnStatus === 'IN_PROGRESS') {
-        moveButtons = `
-          <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:11.5px" data-move-kp="TODO" data-id="${esc(k.id)}">
-            ← Defined
-          </button>
-          <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11.5px" data-move-kp="COMPLETED" data-id="${esc(k.id)}">
-            Target Met ✓
-          </button>
-        `;
-      } else if (columnStatus === 'COMPLETED') {
-        moveButtons = `
-          <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:11.5px" data-move-kp="IN_PROGRESS" data-id="${esc(k.id)}">
-            ← In Progress
-          </button>
-        `;
-      }
-    }
-
-    const jiraUrl = k.jira_issue_key
-      ? `https://apnileap-portfolio.atlassian.net/browse/${encodeURIComponent(k.jira_issue_key)}`
-      : null;
-    const jiraTag = jiraUrl
-      ? `<a href="${jiraUrl}" target="_blank" rel="noopener noreferrer" class="jira-tag" style="text-decoration:none" title="Open KPI in Jira">🔷 ${esc(k.jira_issue_key)} ↗</a>`
-      : `<span class="jira-tag">🎯 KPI</span>`;
-
-    const meas = k.latest_measurement;
-    const measurementBadge = meas
-      ? `<div class="p-2 mb-2 rounded bg-light border" style="font-size:12px">
-           <div class="fw-semibold text-success">Latest: ${esc(meas.measured_value)} ${esc(k.unit || '')}</div>
-           ${meas.evidence ? `<div class="text-muted" style="font-size:11px">Log: ${esc(meas.evidence)}</div>` : ''}
-         </div>`
-      : `<div class="text-muted mb-2" style="font-size:12px">No measurement recorded yet.</div>`;
-
-    return `
-      <div class="kanban-card" data-card-id="${esc(k.id)}" style="border-left: 4px solid #198754;">
-        <div class="d-flex justify-content-between align-items-center mb-1">
-          ${jiraTag}
-          <span class="priority-low">TARGET: ${esc(k.target_value || '-')} ${esc(k.unit || '')}</span>
-        </div>
-        <div class="fw-semibold mb-1" style="font-size:14px; color:#212529">${esc(k.title)}</div>
-        ${measurementBadge}
-        <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
-          <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:11.5px" data-record-kpi="${esc(k.id)}">
-            + Record Value
-          </button>
-          <div class="d-flex gap-1 align-items-center">
-            ${moveButtons}
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
 
   // Wire KPI move buttons
   container.querySelectorAll('[data-move-kp]').forEach((btn) => {
@@ -618,6 +469,134 @@ function renderKpiColumn(containerId, kpis, columnStatus) {
   });
 }
 
+function renderChallengeCard(c, columnStatus) {
+  let moveButtons = '';
+  if (canManageChallenges) {
+    if (columnStatus === 'TODO') {
+      moveButtons = `
+        <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:11.5px" data-move-ch="IN_PROGRESS" data-id="${esc(c.id)}">
+          In Progress →
+        </button>
+      `;
+    } else if (columnStatus === 'IN_PROGRESS') {
+      moveButtons = `
+        <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:11.5px" data-move-ch="TODO" data-id="${esc(c.id)}">
+          ← Open
+        </button>
+        <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11.5px" data-move-ch="COMPLETED" data-id="${esc(c.id)}">
+          Resolved ✓
+        </button>
+      `;
+    } else if (columnStatus === 'COMPLETED') {
+      moveButtons = `
+        <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:11.5px" data-move-ch="IN_PROGRESS" data-id="${esc(c.id)}">
+          ← In Progress
+        </button>
+      `;
+    }
+  }
+
+  const jiraUrl = c.jira_issue_key
+    ? `https://apnileap-portfolio.atlassian.net/browse/${encodeURIComponent(c.jira_issue_key)}`
+    : null;
+  const jiraTag = jiraUrl
+    ? `<a href="${jiraUrl}" target="_blank" rel="noopener noreferrer" class="jira-tag" style="text-decoration:none" title="Open Challenge in Jira">🔷 ${esc(c.jira_issue_key)} ↗</a>`
+    : `<span class="jira-tag">⚠️ Challenge</span>`;
+
+  return `
+    <div class="kanban-card" data-card-id="${esc(c.id)}" style="border-left: 4px solid #ae2a19;">
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        ${jiraTag}
+        <span class="priority-high">⚠️ CHALLENGE</span>
+      </div>
+      <div class="fw-semibold mb-1" style="font-size:14px; color:#212529">${esc(c.title)}</div>
+      ${c.root_cause ? `<div class="text-muted mb-1" style="font-size:12px"><strong>Cause:</strong> ${esc(c.root_cause)}</div>` : ''}
+      ${c.impact ? `<div class="text-muted mb-1" style="font-size:12px"><strong>Impact:</strong> ${esc(c.impact)}</div>` : ''}
+      ${c.support_required ? `<div class="text-primary mb-2" style="font-size:12px"><strong>Support:</strong> ${esc(c.support_required)}</div>` : ''}
+      <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+        <div class="assignee-chip">
+          <span style="font-size:13px">👤</span>
+          <span>${esc(c.assignee_name || 'Student')}</span>
+        </div>
+        <div class="d-flex gap-1 align-items-center">
+          ${moveButtons}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderKpiCard(k, columnStatus) {
+  let moveButtons = '';
+  if (canCreateTask) {
+    if (columnStatus === 'TODO') {
+      moveButtons = `
+        <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:11.5px" data-move-kp="IN_PROGRESS" data-id="${esc(k.id)}">
+          In Progress →
+        </button>
+      `;
+    } else if (columnStatus === 'IN_PROGRESS') {
+      moveButtons = `
+        <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:11.5px" data-move-kp="TODO" data-id="${esc(k.id)}">
+          ← Defined
+        </button>
+        <button class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:11.5px" data-move-kp="COMPLETED" data-id="${esc(k.id)}">
+          Target Met ✓
+        </button>
+      `;
+    } else if (columnStatus === 'COMPLETED') {
+      moveButtons = `
+        <button class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:11.5px" data-move-kp="IN_PROGRESS" data-id="${esc(k.id)}">
+          ← In Progress
+        </button>
+      `;
+    }
+  }
+
+  const jiraUrl = k.jira_issue_key
+    ? `https://apnileap-portfolio.atlassian.net/browse/${encodeURIComponent(k.jira_issue_key)}`
+    : null;
+  const jiraTag = jiraUrl
+    ? `<a href="${jiraUrl}" target="_blank" rel="noopener noreferrer" class="jira-tag" style="text-decoration:none" title="Open KPI in Jira">🔷 ${esc(k.jira_issue_key)} ↗</a>`
+    : `<span class="jira-tag">🎯 KPI</span>`;
+
+  const meas = k.latest_measurement;
+  const measurementBadge = meas
+    ? `<div class="p-2 mb-2 rounded bg-light border" style="font-size:12px">
+         <div class="fw-semibold text-success">Latest: ${esc(meas.measured_value)} ${esc(k.unit || '')}</div>
+         ${meas.evidence ? `<div class="text-muted" style="font-size:11px">Log: ${esc(meas.evidence)}</div>` : ''}
+       </div>`
+    : `<div class="text-muted mb-2" style="font-size:12px">No measurement recorded yet.</div>`;
+
+  return `
+    <div class="kanban-card" data-card-id="${esc(k.id)}" style="border-left: 4px solid #198754;">
+      <div class="d-flex justify-content-between align-items-center mb-1">
+        ${jiraTag}
+        <span class="priority-low">🎯 TARGET: ${esc(k.target_value || '-')} ${esc(k.unit || '')}</span>
+      </div>
+      <div class="fw-semibold mb-1" style="font-size:14px; color:#212529">${esc(k.title)}</div>
+      ${measurementBadge}
+      <div class="d-flex justify-content-between align-items-center mt-2 pt-2 border-top">
+        <button class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size:11.5px" data-record-kpi="${esc(k.id)}">
+          + Record Value
+        </button>
+        <div class="d-flex gap-1 align-items-center">
+          ${moveButtons}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function updateChallengeStatus(challengeId, newStatus) {
+  try {
+    await Api.put(`/projects/${projectId}/workspace-challenges/${challengeId}`, { status: newStatus });
+    await loadWorkspace();
+  } catch (err) {
+    alert(err.message);
+  }
+}
+
 async function updateKpiStatus(kpiId, newStatus) {
   try {
     await Api.put(`/projects/${projectId}/workspace-kpis/${kpiId}`, { status: newStatus });
@@ -633,10 +612,9 @@ async function updateKpiStatus(kpiId, newStatus) {
 function openCreateModal(columnStatus = 'TODO') {
   if (currentBoardType === 'tasks') {
     openCreateTaskModal(columnStatus);
-  } else if (currentBoardType === 'challenges') {
+  } else {
+    // On Challenges & KPIs board, default to challenge modal
     openCreateChallengeModal();
-  } else if (currentBoardType === 'kpis') {
-    openCreateKpiModal();
   }
 }
 
@@ -836,17 +814,13 @@ async function init() {
   kpiModal = new bootstrap.Modal(document.getElementById('kpiModal'));
   measurementModal = new bootstrap.Modal(document.getElementById('measurementModal'));
 
-  // Wire Tab buttons
+  // Wire Tab buttons (Tasks Board vs Combined Challenges & KPIs Board)
   document.getElementById('tabTasks').addEventListener('click', () => {
     currentBoardType = 'tasks';
     updateBoardUIState();
   });
-  document.getElementById('tabChallenges').addEventListener('click', () => {
-    currentBoardType = 'challenges';
-    updateBoardUIState();
-  });
-  document.getElementById('tabKpis').addEventListener('click', () => {
-    currentBoardType = 'kpis';
+  document.getElementById('tabChallengesKpis').addEventListener('click', () => {
+    currentBoardType = 'challenges-kpis';
     updateBoardUIState();
   });
 
@@ -924,8 +898,12 @@ async function init() {
     });
   }
 
-  // Header Add/Create Button
-  document.getElementById('btnCreateTask').addEventListener('click', () => openCreateModal('TODO'));
+  // Header Add/Create Buttons
+  document.getElementById('btnCreateTask').addEventListener('click', () => openCreateTaskModal('TODO'));
+  const btnLogCh = document.getElementById('btnLogChallenge');
+  if (btnLogCh) btnLogCh.addEventListener('click', openCreateChallengeModal);
+  const btnAddKp = document.getElementById('btnAddKpi');
+  if (btnAddKp) btnAddKp.addEventListener('click', openCreateKpiModal);
 
   // Column "+" buttons
   document.querySelectorAll('[data-add-to]').forEach((btn) => {

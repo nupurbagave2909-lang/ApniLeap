@@ -134,10 +134,9 @@ async function ensureJiraProject(project, poolClient = null) {
             }
         }
 
-        // 3. Ensure 3 dedicated boards exist: Tasks, Challenges, KPIs
+        // 3. Ensure dedicated boards exist: 1 for regular Tasks, 1 combined for Challenges & KPIs
         let tasksBoard = { id: null, url: `${baseUrl()}/jira/software/projects/${key}/boards` };
-        let challengesBoard = { id: null, url: `${baseUrl()}/jira/software/projects/${key}/boards` };
-        let kpisBoard = { id: null, url: `${baseUrl()}/jira/software/projects/${key}/boards` };
+        let challengesAndKpisBoard = { id: null, url: `${baseUrl()}/jira/software/projects/${key}/boards` };
 
         try {
             tasksBoard = await ensureDedicatedBoard(
@@ -145,15 +144,10 @@ async function ensureJiraProject(project, poolClient = null) {
                 'Tasks Board',
                 `project = "${key}" AND summary !~ "Challenge" AND summary !~ "KPI" ORDER BY Rank ASC`
             );
-            challengesBoard = await ensureDedicatedBoard(
+            challengesAndKpisBoard = await ensureDedicatedBoard(
                 key,
-                'Challenges Board',
-                `project = "${key}" AND summary ~ "Challenge" ORDER BY Rank ASC`
-            );
-            kpisBoard = await ensureDedicatedBoard(
-                key,
-                'KPIs Board',
-                `project = "${key}" AND summary ~ "KPI" ORDER BY Rank ASC`
+                'Challenges & KPIs Board',
+                `project = "${key}" AND (summary ~ "Challenge" OR summary ~ "KPI") ORDER BY Rank ASC`
             );
             boardId = tasksBoard.id;
 
@@ -172,7 +166,7 @@ async function ensureJiraProject(project, poolClient = null) {
             console.warn(`Could not verify/create boards for ${key}:`, boardErr.message);
         }
 
-        // 4. Insert or update jira_links for all 3 boards
+        // 4. Insert or update jira_links for Tasks board and Challenges & KPIs board
         const boardUrl = tasksBoard.url;
 
         if (!links.length) {
@@ -189,41 +183,24 @@ async function ensureJiraProject(project, poolClient = null) {
             );
         }
 
-        if (challengesBoard.id) {
-            const { rows: chRows } = await db.query(
-                `SELECT id FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_BOARD_CHALLENGES' LIMIT 1`,
-                [project.id]
-            );
-            if (!chRows.length) {
-                await db.query(
-                    `INSERT INTO jira_links (project_id, jira_issue_key, jira_issue_id, link_type)
-                     VALUES ($1, $2, $3, 'JIRA_BOARD_CHALLENGES')`,
-                    [project.id, key, challengesBoard.id]
+        if (challengesAndKpisBoard.id) {
+            for (const linkType of ['JIRA_BOARD_CHALLENGES', 'JIRA_BOARD_KPIS', 'JIRA_BOARD_CHALLENGES_KPIS']) {
+                const { rows: existingRows } = await db.query(
+                    `SELECT id FROM jira_links WHERE project_id = $1 AND link_type = $2 LIMIT 1`,
+                    [project.id, linkType]
                 );
-            } else {
-                await db.query(
-                    `UPDATE jira_links SET jira_issue_id = $1 WHERE id = $2`,
-                    [challengesBoard.id, chRows[0].id]
-                );
-            }
-        }
-
-        if (kpisBoard.id) {
-            const { rows: kpRows } = await db.query(
-                `SELECT id FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_BOARD_KPIS' LIMIT 1`,
-                [project.id]
-            );
-            if (!kpRows.length) {
-                await db.query(
-                    `INSERT INTO jira_links (project_id, jira_issue_key, jira_issue_id, link_type)
-                     VALUES ($1, $2, $3, 'JIRA_BOARD_KPIS')`,
-                    [project.id, key, kpisBoard.id]
-                );
-            } else {
-                await db.query(
-                    `UPDATE jira_links SET jira_issue_id = $1 WHERE id = $2`,
-                    [kpisBoard.id, kpRows[0].id]
-                );
+                if (!existingRows.length) {
+                    await db.query(
+                        `INSERT INTO jira_links (project_id, jira_issue_key, jira_issue_id, link_type)
+                         VALUES ($1, $2, $3, $4)`,
+                        [project.id, key, challengesAndKpisBoard.id, linkType]
+                    );
+                } else {
+                    await db.query(
+                        `UPDATE jira_links SET jira_issue_id = $1 WHERE id = $2`,
+                        [challengesAndKpisBoard.id, existingRows[0].id]
+                    );
+                }
             }
         }
 
@@ -232,8 +209,9 @@ async function ensureJiraProject(project, poolClient = null) {
             boardId,
             url: boardUrl,
             tasksBoard,
-            challengesBoard,
-            kpisBoard,
+            challengesAndKpisBoard,
+            challengesBoard: challengesAndKpisBoard,
+            kpisBoard: challengesAndKpisBoard,
             link_type: 'JIRA_PROJECT',
         };
     } catch (err) {

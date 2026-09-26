@@ -973,11 +973,17 @@ function renderIntegrationStatus() {
     docParts.push(currentJiraLink
       ? `Jira Tasks Board: <a href="${esc(currentJiraLink.url)}" target="_blank" rel="noopener noreferrer">${esc(currentJiraLink.key)} Board ↗</a>`
       : 'Jira issue: not created yet.');
-    if (currentChallengesJiraLink?.url) {
-      docParts.push(`Jira Challenges Board: <a href="${esc(currentChallengesJiraLink.url)}" target="_blank" rel="noopener noreferrer">Open Challenges Board ↗</a>`);
-    }
-    if (currentKpisJiraLink?.url) {
-      docParts.push(`Jira KPIs Board: <a href="${esc(currentKpisKiraLink || currentKpisJiraLink.url)}" target="_blank" rel="noopener noreferrer">Open KPIs Board ↗</a>`);
+    const chUrl = currentChallengesJiraLink?.url;
+    const kpUrl = currentKpisJiraLink?.url;
+    if (chUrl && kpUrl && chUrl === kpUrl) {
+      docParts.push(`Jira Challenges & KPIs Board: <a href="${esc(chUrl)}" target="_blank" rel="noopener noreferrer">Open Challenges & KPIs Board ↗</a>`);
+    } else {
+      if (chUrl) {
+        docParts.push(`Jira Challenges Board: <a href="${esc(chUrl)}" target="_blank" rel="noopener noreferrer">Open Challenges Board ↗</a>`);
+      }
+      if (kpUrl) {
+        docParts.push(`Jira KPIs Board: <a href="${esc(kpUrl)}" target="_blank" rel="noopener noreferrer">Open KPIs Board ↗</a>`);
+      }
     }
     docEl.innerHTML = docParts.join('<br>');
   }

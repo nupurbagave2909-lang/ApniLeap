@@ -120,11 +120,15 @@
           <span class="refresh-spinner-icon">🔄</span> Refresh &amp; Sync
         </button>
         <button class="btn btn-al-primary btn-sm" id="btnCreateTask">+ Create Task</button>
+        <div class="d-none d-flex gap-2" id="wrapChallengesKpisButtons">
+          <button class="btn btn-danger btn-sm" id="btnLogChallenge">+ Log Challenge</button>
+          <button class="btn btn-success btn-sm" id="btnAddKpi">+ Add KPI</button>
+        </div>
       </div>
     </div>
   </div>
 
-  <!-- Dedicated Boards Switcher -->
+  <!-- Dedicated Boards Switcher: Tasks Board & Combined Challenges/KPIs Board -->
   <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
     <ul class="nav nav-pills gap-2" id="boardTabs" role="tablist">
       <li class="nav-item">
@@ -134,15 +138,9 @@
         </button>
       </li>
       <li class="nav-item">
-        <button class="nav-link fw-semibold d-flex align-items-center gap-1" id="tabChallenges" data-board="challenges">
-          ⚠️ <span>Challenges Board</span>
-          <span class="badge bg-danger rounded-pill ms-1" id="badgeChallengesCount">0</span>
-        </button>
-      </li>
-      <li class="nav-item">
-        <button class="nav-link fw-semibold d-flex align-items-center gap-1" id="tabKpis" data-board="kpis">
-          🎯 <span>KPIs Board</span>
-          <span class="badge bg-success rounded-pill ms-1" id="badgeKpisCount">0</span>
+        <button class="nav-link fw-semibold d-flex align-items-center gap-1" id="tabChallengesKpis" data-board="challenges-kpis">
+          ⚠️🎯 <span>Challenges &amp; KPIs Board</span>
+          <span class="badge bg-warning text-dark rounded-pill ms-1" id="badgeChallengesKpisCount">0</span>
         </button>
       </li>
     </ul>
@@ -158,8 +156,7 @@
         </button>
         <ul class="dropdown-menu dropdown-menu-end shadow-sm" style="font-size:13px">
           <li><a class="dropdown-item" id="linkJiraTasksBoard" href="#" target="_blank">📋 Tasks Board ↗</a></li>
-          <li><a class="dropdown-item" id="linkJiraChallengesBoard" href="#" target="_blank">⚠️ Challenges Board ↗</a></li>
-          <li><a class="dropdown-item" id="linkJiraKpisBoard" href="#" target="_blank">🎯 KPIs Board ↗</a></li>
+          <li><a class="dropdown-item" id="linkJiraChallengesKpisBoard" href="#" target="_blank">⚠️🎯 Challenges &amp; KPIs Board ↗</a></li>
         </ul>
       </div>
     </div>

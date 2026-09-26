@@ -231,18 +231,18 @@ async function listWorkspaceTasks(req, res, next) {
 
         // Query dedicated board links from DB
         const { rows: chBoardLinks } = await pool.query(
-            `SELECT * FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_BOARD_CHALLENGES' LIMIT 1`,
+            `SELECT * FROM jira_links WHERE project_id = $1 AND link_type IN ('JIRA_BOARD_CHALLENGES', 'JIRA_BOARD_CHALLENGES_KPIS') ORDER BY created_at DESC LIMIT 1`,
             [projectId]
         );
         const { rows: kpBoardLinks } = await pool.query(
-            `SELECT * FROM jira_links WHERE project_id = $1 AND link_type = 'JIRA_BOARD_KPIS' LIMIT 1`,
+            `SELECT * FROM jira_links WHERE project_id = $1 AND link_type IN ('JIRA_BOARD_KPIS', 'JIRA_BOARD_CHALLENGES_KPIS') ORDER BY created_at DESC LIMIT 1`,
             [projectId]
         );
 
         const baseUrl = jiraService.baseUrl();
         const tasksBoardUrl = jiraInfo?.tasksBoard?.url || (projectKey && boardUrl ? boardUrl : `${baseUrl}/jira/software/projects/${projectKey}/boards`);
-        const challengesBoardUrl = jiraInfo?.challengesBoard?.url || (chBoardLinks[0]?.jira_issue_id ? `${baseUrl}/jira/software/projects/${projectKey}/boards/${chBoardLinks[0].jira_issue_id}` : `${baseUrl}/jira/software/projects/${projectKey}/boards`);
-        const kpisBoardUrl = jiraInfo?.kpisBoard?.url || (kpBoardLinks[0]?.jira_issue_id ? `${baseUrl}/jira/software/projects/${projectKey}/boards/${kpBoardLinks[0].jira_issue_id}` : `${baseUrl}/jira/software/projects/${projectKey}/boards`);
+        const combinedBoardId = chBoardLinks[0]?.jira_issue_id || kpBoardLinks[0]?.jira_issue_id;
+        const challengesAndKpisBoardUrl = jiraInfo?.challengesAndKpisBoard?.url || jiraInfo?.challengesBoard?.url || (combinedBoardId ? `${baseUrl}/jira/software/projects/${projectKey}/boards/${combinedBoardId}` : `${baseUrl}/jira/software/projects/${projectKey}/boards`);
 
         res.json({
             tasks,
@@ -255,13 +255,18 @@ async function listWorkspaceTasks(req, res, next) {
             },
             challengesJiraLink: {
                 key: projectKey,
-                url: challengesBoardUrl,
+                url: challengesAndKpisBoardUrl,
                 link_type: 'JIRA_BOARD_CHALLENGES',
             },
             kpisJiraLink: {
                 key: projectKey,
-                url: kpisBoardUrl,
+                url: challengesAndKpisBoardUrl,
                 link_type: 'JIRA_BOARD_KPIS',
+            },
+            challengesAndKpisJiraLink: {
+                key: projectKey,
+                url: challengesAndKpisBoardUrl,
+                link_type: 'JIRA_BOARD_CHALLENGES_KPIS',
             },
             project: {
                 id: req.project.id,
